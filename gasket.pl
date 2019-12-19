@@ -1,4 +1,12 @@
 
+/*
+TODO:
+- convert to cplfd (clpfd with floats?)
+- complete
+- validate
+
+*/
+
 :- use_module(library(clpfd)).
 
 :- dynamic circle/2.

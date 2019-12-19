@@ -11,7 +11,7 @@
 
 % checks if that each of the 3 circles touches each of the other 2 in one exactly one point
 valid(circle(R1,C1),circle(R2,C2),circle(R3,C3)) :-
-  dist(C1,C2,D12),
+  dist(C1,C2,D12), % need to round D12, D13, D23
   dist(C1,C3,D13),
   dist(C2,C3,D23),
   R1+R2 #= D12,

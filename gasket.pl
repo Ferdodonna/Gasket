@@ -88,6 +88,19 @@ middle(C1,C2,C3,S1,S2,S3) :-
   crossing(L2,L3,S2),
   crossing(L3,L1,S3).
 
+isMiddle(circle(R1,C1),circle(R2,C2),circle(R3,C3),M) :-
+  dist(C1,M,D1),
+  T1 is D1 - R1,
+
+  dist(C2,M,D2),
+  T2 is D2 - R2,
+
+  dist(C3,M,D3),
+  T3 is D3 - R3,
+
+  print(T1),nl,print(T2),nl,print(T3).
+
+
 /*
 Testlauf:
 

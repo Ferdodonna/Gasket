@@ -34,24 +34,26 @@ circumface(B,C,A,U) :-
 dist(kart(X1,Y1),kart(X2,Y2),D) :-
   D = sqrt((X1 - X2)^2 + (Y1-Y2)^2).
 
-choose(0,_,[]).
-choose(N,[A|B],[A|R]) :-
+choose(0,A,[],A).
+choose(N,[A|B],[A|R],L) :-
   Nl is N -1,
-  choose(Nl,B,R).
-choose(N,[_|B],R) :- choose(N,B,R).
+  choose(Nl,B,R,L).
+choose(N,[A|B],R,[A|L]) :- choose(N,B,R,L).
 
-isopP(triangle(P1,P2,P3),IP) :-
+isopP(triangle(P1,P2,P3),IP1,IP2) :-
   dist(P1,P2,A),
   dist(P2,P3,B),
   dist(P3,P1,C),
   area(A,B,C,Area),
   circumface(A,B,C,U),
   S = U / 2,
-  maplist(baryfy(S,Area),[A,B,C],[IPA,IPB,IPC]),
-  IP = bary(IPA,IPB,IPC).
+  maplist(baryfy(S,Area),[A,B,C],[tuple(IPA1,IPA2),tuple(IPB1,IPB2),tuple(IPC1,IPC2)]),
+  IP1 = bary(IPA1,IPB1,IPC1),
+  IP2 = bary(IPA2,IPB2,IPC2).
 
-baryfy(S,Area,A,Bary):-
-  Bary = A - Area / (S - A).
+baryfy(S,Area,A,tuple(BaryN,BaryP)):-
+  BaryN = A - Area / (S - A),
+  BaryP = A + Area / (S - A).
 
 fromBary(triangle(kart(X1,Y1),
                   kart(X2,Y2),

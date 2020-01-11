@@ -131,10 +131,10 @@ compute :-
 	, R3 is D-R1
 	, K3 = kreis(P3,R3)
 	, write(K3)
-	, write("\n")
+	, nl
 	, umschreibender_kreis(K1,K2,K3,KU)
 	, write(KU)
-	, write("\n")
+	, nl
 	, tangentialer_kreis(K3,K2,KU,KI)
 	, write(KI)
 .

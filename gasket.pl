@@ -1,38 +1,18 @@
-% k4 = k1 + k2 + k3 +- 2 * sqrt(k1k2+k2k3+k3k1)
-:- dynamic (done/3),(counter/1)).
-counter(0).
+radius(kreis(_,R), R).
 
-kehr(1/B,B).
-kehr(B,1/B).
+% Berechnet Flächeninhalt eines Dreiecks
+inhalt(dreieck(A,B,C),I) :- P = (A + B + C) / 2, I is sqrt(P * (P - A) * (P - B) * (P - C)).
 
-radii(R1,R2,R3,Ri,Ro):-
-  maplist(kehr,[R1,R2,R3],[K1,K2,K3]),
-  Ksum = K1 + K2 + K3,
-  Kroot = sqrt(K1*K2 + K2*K3 + K3*K1),
-  Ki = Ksum - 2 * Kroot,
-  Ko = Ksum + 2 * Kroot,
-  (
-  Ki < 0 ->
-    kehr(-Ki,Ro),
-    kehr(Ko,Ri)
-    ;
-    kehr(Ki,Ri),
-    kehr(-Ko,Ro)
-  ).
+% Berechnet Umfang eines Dreiecks
+umfang(dreieck(A,B,C),U) :- U is A + B + C.
 
-% herons formula:
-% Area = sqrt(p(p-a)(p-b)(p-c))
-% p = (a+b+c) / 2
-area(A,B,C,Area) :-
-    P = (A+B+C) / 2,
-    Area = sqrt(P*(P-A)*(P-B)*(P-C)).
+% Gibt Position zurück
+position(kreis(P,_),P).
+position(kartesisch(X,Y),kartesisch(X,Y)).
 
-circumface(B,C,A,U) :-
-  U = A + B + C.
+% Berechnet Abstand zweier Objekte mit Position
+abstand(kartesisch(X1,Y1),kartesisch(X2,Y2),D) :- D is sqrt((X1 - X2)^2 + (Y1-Y2)^2).
 
-
-dist(kart(X1,Y1),kart(X2,Y2),D) :-
-  D = sqrt((X1 - X2)^2 + (Y1-Y2)^2).
 
 choose(0,A,[],A).
 choose(N,[A|B],[A|R],L) :-
@@ -40,35 +20,121 @@ choose(N,[A|B],[A|R],L) :-
   choose(Nl,B,R,L).
 choose(N,[A|B],R,[A|L]) :- choose(N,B,R,L).
 
-isopP(triangle(P1,P2,P3),IP1,IP2) :-
-  dist(P1,P2,A),
-  dist(P2,P3,B),
-  dist(P3,P1,C),
-  area(A,B,C,Area),
-  circumface(A,B,C,U),
-  S = U / 2,
-  maplist(baryfy(S,Area),[A,B,C],[tuple(IPA1,IPA2),tuple(IPB1,IPB2),tuple(IPC1,IPC2)]),
-  IP1 = bary(IPA1,IPB1,IPC1),
-  IP2 = bary(IPA2,IPB2,IPC2).
+% Kreiert ein Dreieck aus drei Positionen
+seiten(dreieck(P1,P2,P3),dreieck(A,B,C)) :-
+	abstand(P1,P2,A)
+	, abstand(P2,P3,B)
+	, abstand(P3,P1,C)
+.
 
-baryfy(S,Area,A,tuple(BaryN,BaryP)):-
-  BaryN = A - Area / (S - A),
-  BaryP = A + Area / (S - A).
+% Berechnet zu drei Kreisen den Umschreibenden Kreis
+umschreibender_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),KU) :-
 
-fromBary(triangle(kart(X1,Y1),
-                  kart(X2,Y2),
-                  kart(X3,Y3)),
-         bary(A,B,C),
-         kart(X,Y))
-         :-
-  Bsum = A+B+C
-  X = (A * X1 + B * X2 + C * X3) / Bsum,
-  Y = (A * Y1 + B * Y2 + C * Y3) / Bsum.
+	% Position Berechnung
+	seiten(dreieck(P1,P2,P3),dreieck(A,B,C))
+	, inhalt(dreieck(A,B,C),I)
+	, umfang(dreieck(A,B,C),U)
+	, UH is U / 2
+	, BaryA is A - I / (UH - A)
+	, BaryB is B - I / (UH - B)
+	, BaryC is C - I / (UH - C)
+	
+	% Radius Berechnung
+	, InvSum is 1/R1 + 1/R2 + 1/R3
+	, InvRoot is sqrt( 1 / (R1 * R2) + 1 / (R2 * R3) + 1 / (R1 * R3) )
+	, RU is abs( 1 / ( InvSum - 2 * InvRoot ) )
+	
+	% Konvertierung
+	, baryzentrisch2kartesisch(baryzentrisch(BaryA,BaryB,BaryC), dreieck(P1,P2,P3), PU)
+	
+	, KU = kreis(PU, RU)
+.
 
-/*
+% Berechnet zu drei Kreisen den Umschreibenden Kreis
+inbeschriebener_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),KI) :-
 
-Tagge einzelne Kreise mit Nummern, da wir die Radien und so weiter ja noch nicht ausrechnen.
-Asserte bereits verwendete Kreistripel als done(a,b,c) a<b<c
-Habe counter zum produzieren der Tag-Nummern as dynamic predicate
+	% Position Berechnung
+	seiten(dreieck(P1,P2,P3),dreieck(A,B,C))
+	, inhalt(dreieck(A,B,C),I)
+	, umfang(dreieck(A,B,C),U)
+	, UH is U / 2
+	, BaryA is A + I / (UH - A)
+	, BaryB is B + I / (UH - B)
+	, BaryC is C + I / (UH - C)
+	
+	% Radius Berechnung
+	, InvSum is 1/R1 + 1/R2 + 1/R3
+	, InvRoot is sqrt( 1 / (R1 * R2) + 1 / (R2 * R3) + 1 / (R1 * R3) )
+	, RU is abs( 1 / ( InvSum + 2 * InvRoot ) )
+	
+	% Konvertierung
+	, baryzentrisch2kartesisch(baryzentrisch(BaryA,BaryB,BaryC), dreieck(P1,P2,P3), PU)
+	
+	, KI = kreis(PU, RU)
+.
 
-*/
+
+kartesisch2baryzentrisch(
+	kartesisch(X,Y)
+	, dreieck(kartesisch(X1,Y1), kartesisch(X2,Y2), kartesisch(X3,Y3))
+	, baryzentrisch(A,B,C)
+) :-
+	A is (Y3 - Y2) * X + (X2 - X3) * Y + (X3 * Y2 - X2 * Y3)
+	, B is (Y1 - Y3) * X + (X3 - X1) * Y + (X1 * Y3 - X3 * Y1)
+	, C is (Y2 - Y1) * X + (X1 - X2) * Y + (X2 * Y1 - X1 * Y2)
+.
+
+
+% Berechnet zu zwei inneren Kreisen und einem umschreibenden Kreis den inbeschriebenen Kreis
+tangentialer_kreis(kreis(P1,R1),kreis(P2,R2),/* umschreibender Kreis */ kreis(P3,R3),KT) :-
+
+	% Position Berechnung
+	seiten(dreieck(P1,P2,P3),dreieck(A,B,C))
+	, inhalt(dreieck(A,B,C),I)
+	, umfang(dreieck(A,B,C),U)
+	, UH is U / 2
+	, BaryA is A + I / (UH - A)
+	, BaryB is B + I / (UH - B)
+	, BaryC is C + I / (UH - C)
+	
+	% Radius Berechnung
+	, K1 is 1 / R1
+	, K2 is 1 / R2
+	, K3 is 1 / R3
+	, RT is 1 / ( -2 * sqrt(K1 * K2 - K1 * K3 - K2 * K3) + K1 + K2 - K3 )
+	
+	% Konvertierung
+	, baryzentrisch2kartesisch(baryzentrisch(BaryA,BaryB,BaryC), dreieck(P1,P2,P3), PT)
+	
+	, KT = kreis(PT, RT)
+.
+
+
+% Konvertiert Baryzentrische Koordinaten zu kartesischen
+baryzentrisch2kartesisch(
+	baryzentrisch(A,B,C)
+	, dreieck(kartesisch(X1,Y1), kartesisch(X2,Y2), kartesisch(X3,Y3))
+    , kartesisch(X,Y)
+) :-
+	Bsum is A + B + C
+	, X is (A * X3 + B * X1 + C * X2) / Bsum
+	, Y is (A * Y3 + B * Y1 + C * Y2) / Bsum
+.
+
+compute :-
+	K1 = kreis(kartesisch(100, 100),100)
+	, K2 = kreis(kartesisch(300,100),100)
+	, P3 = kartesisch(200, 300)
+	, position(K1,P1)
+	, abstand(P1,P3,D)
+	, radius(K1, R1)
+	, R3 is D-R1
+	, K3 = kreis(P3,R3)
+	, write(K3)
+	, write("\n")
+	, umschreibender_kreis(K1,K2,K3,KU)
+	, write(KU)
+	, write("\n")
+	, tangentialer_kreis(K3,K2,KU,KI)
+	, write(KI)
+.

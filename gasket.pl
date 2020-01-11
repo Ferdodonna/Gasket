@@ -38,15 +38,15 @@ umschreibender_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),KU) :-
 	, BaryA is A - I / (UH - A)
 	, BaryB is B - I / (UH - B)
 	, BaryC is C - I / (UH - C)
-	
+
 	% Radius Berechnung
 	, InvSum is 1/R1 + 1/R2 + 1/R3
 	, InvRoot is sqrt( 1 / (R1 * R2) + 1 / (R2 * R3) + 1 / (R1 * R3) )
 	, RU is abs( 1 / ( InvSum - 2 * InvRoot ) )
-	
+
 	% Konvertierung
 	, baryzentrisch2kartesisch(baryzentrisch(BaryA,BaryB,BaryC), dreieck(P1,P2,P3), PU)
-	
+
 	, KU = kreis(PU, RU)
 .
 
@@ -61,15 +61,15 @@ inbeschriebener_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),KI) :-
 	, BaryA is A + I / (UH - A)
 	, BaryB is B + I / (UH - B)
 	, BaryC is C + I / (UH - C)
-	
+
 	% Radius Berechnung
 	, InvSum is 1/R1 + 1/R2 + 1/R3
 	, InvRoot is sqrt( 1 / (R1 * R2) + 1 / (R2 * R3) + 1 / (R1 * R3) )
 	, RU is abs( 1 / ( InvSum + 2 * InvRoot ) )
-	
+
 	% Konvertierung
 	, baryzentrisch2kartesisch(baryzentrisch(BaryA,BaryB,BaryC), dreieck(P1,P2,P3), PU)
-	
+
 	, KI = kreis(PU, RU)
 .
 
@@ -96,16 +96,16 @@ tangentialer_kreis(kreis(P1,R1),kreis(P2,R2),/* umschreibender Kreis */ kreis(P3
 	, BaryA is A + I / (UH - A)
 	, BaryB is B + I / (UH - B)
 	, BaryC is C + I / (UH - C)
-	
+
 	% Radius Berechnung
 	, K1 is 1 / R1
 	, K2 is 1 / R2
 	, K3 is 1 / R3
 	, RT is 1 / ( -2 * sqrt(K1 * K2 - K1 * K3 - K2 * K3) + K1 + K2 - K3 )
-	
+
 	% Konvertierung
 	, baryzentrisch2kartesisch(baryzentrisch(BaryA,BaryB,BaryC), dreieck(P1,P2,P3), PT)
-	
+
 	, KT = kreis(PT, RT)
 .
 
@@ -114,7 +114,7 @@ tangentialer_kreis(kreis(P1,R1),kreis(P2,R2),/* umschreibender Kreis */ kreis(P3
 baryzentrisch2kartesisch(
 	baryzentrisch(A,B,C)
 	, dreieck(kartesisch(X1,Y1), kartesisch(X2,Y2), kartesisch(X3,Y3))
-    , kartesisch(X,Y)
+  , kartesisch(X,Y)
 ) :-
 	Bsum is A + B + C
 	, X is (A * X3 + B * X1 + C * X2) / Bsum
@@ -137,4 +137,59 @@ compute :-
 	, write("\n")
 	, tangentialer_kreis(K3,K2,KU,KI)
 	, write(KI)
+.
+
+% Predikat ist wahr wenn PC und PD auf unterschiedlichen Seiten der Gerade durch
+% P1 und P2 sind
+gegenseitig(P1,P2,PC,PD) :-
+  gradient(P1,P2,G)
+  , orthogonal(G,Go)
+  , vektorabstand_punkt_gerade(gerade(PC,Go),gerade(P1,G),kart(CX,CY))
+  , vektorabstand_punkt_gerade(gerade(PD,Go),gerade(P1,G),kart(DX,DY))
+  , F1 is DX * CX
+  , F2 is DY * CY
+  , 0 < F1 * F2
+.
+
+% Minimaler Vektor zwischen einem Punkt P und einer Gerade Gerade2 oder so, ich
+% gebe den Gradient der kürzesten Strecke von P zu Gerade2 mit weil ichs kann
+vektorabstand_punkt_gerade(gerade(P,G),Gerade2,VAbstand) :-
+  schnittpunkt(gerade(P,G),Gerade2,SP)
+  , abstand_vektor(P,SP,VAbstand)
+.
+
+% Vektor zwischen zwei Punkten
+abstand_vektor(kart(X1,Y1),kart(X2,Y2),kart(X,Y)) :-
+  X is X1 - X2
+  , Y is Y1 - Y2
+.
+
+% Gradient einer Gerade definiert durch zwei Punkte
+gradient(kart(A,B),kart(C,D),G) :-
+  A \= C
+  , G is (B - D) / (A - C)
+.
+
+% Predikat hält wenn die beiden Geraden/Gradienten orthogonal sind
+orthogonal(gerade(_,G1),gerade(_,G2)) :-
+  !,orthogonal(G1,G2)
+.
+orthogonal(G1,G2) :-
+  nonvar(G2)
+  , G2 \= 0
+  , G1 is (-1) * (1 / G2)
+.
+orthogonal(G1,G2) :-
+  nonvar(G1)
+  , G1 \= 0
+  , G2 is (-1) * (1 /G1)
+.
+
+% Schnittpunkt zweier Geraden
+schnittpunkt(gerade(kart(X1,Y1),G1),gerade(kart(X2,Y2),G2),kart(X,Y)) :-
+  G1 \= G2
+  , YZ1 is Y1 - X1 * G1
+  , YZ2 is Y2 - X2 * G2
+  , X is (YZ2 - YZ1) / (G1- G2)
+  , Y is X*G1 + YZ1
 .

@@ -44,7 +44,7 @@ umschreibender_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),KU) :-
 	% Radius Berechnung
 	, InvSum is 1/R1 + 1/R2 + 1/R3
 	, InvRoot is sqrt( 1 / (R1 * R2) + 1 / (R2 * R3) + 1 / (R1 * R3) )
-	, RU is abs( 1 / ( InvSum - 2 * InvRoot ) )
+	, RU is 1 / ( InvSum - 2 * InvRoot )
 
 	% Konvertierung
 	, baryzentrisch2kartesisch(baryzentrisch(BaryA,BaryB,BaryC), dreieck(P1,P2,P3), PU)
@@ -69,7 +69,7 @@ inbeschriebener_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),KI) :-
 	% Radius Berechnung
 	, InvSum is 1/R1 + 1/R2 + 1/R3
 	, InvRoot is sqrt( 1 / (R1 * R2) + 1 / (R2 * R3) + 1 / (R1 * R3) )
-	, RU is abs( 1 / ( InvSum + 2 * InvRoot ) )
+	, RU is 1 / ( InvSum + 2 * InvRoot )
 
 	% Konvertierung
 	, baryzentrisch2kartesisch(baryzentrisch(BaryA,BaryB,BaryC), dreieck(P1,P2,P3), PU)
@@ -171,9 +171,7 @@ compute :-
 	, nl
 	, umschreibender_kreis(K1,K2,K3,KU)
 	, write(KU)
-  , KU = kreis(PU,RU)
-  , KNU = kreis(PU,-RU)
-  , einer_aussen_zwei_innen(K1,K2,KNU,K3N,K4)
+  , einer_aussen_zwei_innen(K1,K2,KU,K3N,K4)
   , nl
   , write(K3N)
   , nl
@@ -187,9 +185,7 @@ gegenseitig(P1,P2,PC,PD) :-
   , orthogonal(G,Go)
   , vektorabstand_punkt_gerade(gerade(PC,Go),gerade(P1,G),kart(CX,CY))
   , vektorabstand_punkt_gerade(gerade(PD,Go),gerade(P1,G),kart(DX,DY))
-  , F1 is DX * CX
-  , F2 is DY * CY
-  , 0 < F1 * F2
+  , 0 < DX * CX * DY * CY
 .
 
 % Minimaler Vektor zwischen einem Punkt P und einer Gerade Gerade2 oder so, ich

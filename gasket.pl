@@ -1,7 +1,7 @@
 radius(kreis(_,R), R).
 
 % Berechnet Flächeninhalt eines Dreiecks
-inhalt(dreieck(A,B,C),I) :- P = (A + B + C) / 2, I is sqrt(P * (P - A) * (P - B) * (P - C)).
+inhalt(dreieck(A,B,C),P,I) :- I is sqrt(P * (P - A) * (P - B) * (P - C)).
 
 % Berechnet Umfang eines Dreiecks
 umfang(dreieck(A,B,C),U) :- U is A + B + C.
@@ -31,10 +31,12 @@ seiten(dreieck(P1,P2,P3),dreieck(A,B,C)) :-
 umschreibender_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),KU) :-
 
 	% Position Berechnung
-	seiten(dreieck(P1,P2,P3),dreieck(A,B,C))
-	, inhalt(dreieck(A,B,C),I)
+  A is R1 + R2
+  , B is R2 + R3
+  , C is R3 + R1
 	, umfang(dreieck(A,B,C),U)
 	, UH is U / 2
+	, inhalt(dreieck(A,B,C),UH,I)
 	, BaryA is A - I / (UH - A)
 	, BaryB is B - I / (UH - B)
 	, BaryC is C - I / (UH - C)
@@ -54,10 +56,12 @@ umschreibender_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),KU) :-
 inbeschriebener_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),KI) :-
 
 	% Position Berechnung
-	seiten(dreieck(P1,P2,P3),dreieck(A,B,C))
-	, inhalt(dreieck(A,B,C),I)
+	A is R1 + R2
+  , B is R2 + R3
+  , C is R3 + R1
 	, umfang(dreieck(A,B,C),U)
 	, UH is U / 2
+	, inhalt(dreieck(A,B,C),UH,I)
 	, BaryA is A + I / (UH - A)
 	, BaryB is B + I / (UH - B)
 	, BaryC is C + I / (UH - C)
@@ -84,31 +88,51 @@ kartesisch2baryzentrisch(
 	, C is (Y2 - Y1) * X + (X1 - X2) * Y + (X2 * Y1 - X1 * Y2)
 .
 
+% Kreis 3 umschreibt Kreis 1 und 2
+einer_aussen_zwei_innen(/*innere Kreise*/kreis(P1,R1),kreis(P2,R2),/*äußerer Kreis*/ kreis(P3,R3),K4,K5) :-
+  % Radii
+  R3 < 0 % ist ja außen
+  , K1 is 1/R1
+  , K2 is 1/R2
+  , K3 is 1/R3
+  , Ksum is K1 + K2 + K3
+  , Ksqrt is sqrt(K1 * K2 + K2 * K3 + K3 * K1)
+  , R4 is 1 / (Ksum + 2 * Ksqrt)
+  , R5 is 1 / (Ksum - 2 * Ksqrt)
 
-% Berechnet zu zwei inneren Kreisen und einem umschreibenden Kreis den inbeschriebenen Kreis
-tangentialer_kreis(kreis(P1,R1),kreis(P2,R2),/* umschreibender Kreis */ kreis(P3,R3),KT) :-
+  % Center
+  % 4
+  , A1 is R1 + R2
+  , B1 is R2 + R4
+  , C1 is R4 + R1
+  , umfang(dreieck(A1,B1,C1),U1)
+  , UH1 is U1 / 2
+  , inhalt(dreieck(A1,B1,C1),UH1,I1)
+  , BaryA1 is A1 - I1 / (UH1 - A1)
+  , BaryB1 is B1 - I1 / (UH1 - B1)
+  , BaryC1 is C1 - I1 / (UH1 - C1)
 
-	% Position Berechnung
-	seiten(dreieck(P1,P2,P3),dreieck(A,B,C))
-	, inhalt(dreieck(A,B,C),I)
-	, umfang(dreieck(A,B,C),U)
-	, UH is U / 2
-	, BaryA is A + I / (UH - A)
-	, BaryB is B + I / (UH - B)
-	, BaryC is C + I / (UH - C)
+  , baryzentrisch2kartesisch(baryzentrisch(BaryA1,BaryB1,BaryC1)
+                            , dreieck(P1,P2,P4)
+                            , P3)
+  , K4 = kreis(P4,R4)
 
-	% Radius Berechnung
-	, K1 is 1 / R1
-	, K2 is 1 / R2
-	, K3 is 1 / R3
-	, RT is 1 / ( -2 * sqrt(K1 * K2 - K1 * K3 - K2 * K3) + K1 + K2 - K3 )
+  % 5
+  , A2 is R1 + R2
+  , B2 is R2 + R5
+  , C2 is R5 + R1
+  , umfang(dreieck(A2,B2,C2),U2)
+  , UH2 is U2 / 2
+  , inhalt(dreieck(A2,B2,C2),UH2,I2)
+  , BaryA2 is A2 - I2 / (UH2 - A2)
+  , BaryB2 is B2 - I2 / (UH2 - B2)
+  , BaryC2 is C2 - I2 / (UH2 - C2)
 
-	% Konvertierung
-	, baryzentrisch2kartesisch(baryzentrisch(BaryA,BaryB,BaryC), dreieck(P1,P2,P3), PT)
-
-	, KT = kreis(PT, RT)
+  , baryzentrisch2kartesisch(baryzentrisch(BaryA2,BaryB2,BaryC2)
+                            , dreieck(P1,P2,P5)
+                            , P3)
+  , K5 = kreis(P5,R5)
 .
-
 
 % Konvertiert Baryzentrische Koordinaten zu kartesischen
 baryzentrisch2kartesisch(
@@ -116,9 +140,22 @@ baryzentrisch2kartesisch(
 	, dreieck(kartesisch(X1,Y1), kartesisch(X2,Y2), kartesisch(X3,Y3))
   , kartesisch(X,Y)
 ) :-
-	Bsum is A + B + C
+  maplist(nonvar,[A,B,C,X1,Y1,X2,Y2,X3,Y3])
+  , !
+	, Bsum is A + B + C
 	, X is (A * X3 + B * X1 + C * X2) / Bsum
 	, Y is (A * Y3 + B * Y1 + C * Y2) / Bsum
+.
+baryzentrisch2kartesisch(
+	baryzentrisch(A,B,C)
+	, dreieck(kartesisch(X1,Y1), kartesisch(X2,Y2), kartesisch(X3,Y3))
+  , kartesisch(X,Y)
+) :-
+  maplist(nonvar,[A,B,C,X1,Y2,X2,Y2,X,Y])
+  , !
+  , Bsum is A + B + C
+  , X3 is (X * Bsum - B * X1 - C * X2) / A
+  , Y3 is (Y * Bsum - B * Y1 - C * Y2) / A
 .
 
 compute :-
@@ -134,9 +171,13 @@ compute :-
 	, nl
 	, umschreibender_kreis(K1,K2,K3,KU)
 	, write(KU)
-	, nl
-	, tangentialer_kreis(K3,K2,KU,KI)
-	, write(KI)
+  , KU = kreis(PU,RU)
+  , KNU = kreis(PU,-RU)
+  , einer_aussen_zwei_innen(K1,K2,KNU,K3N,K4)
+  , nl
+  , write(K3N)
+  , nl
+  , write(K4)
 .
 
 % Predikat ist wahr wenn PC und PD auf unterschiedlichen Seiten der Gerade durch

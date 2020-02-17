@@ -225,16 +225,16 @@ durchlauf(
 % Key gibt den Modus an nach dem die Farbe kreiert werden soll
 % Streckung gibt Wert an durch welchen P potenziert werden soll um die Verteilung mehr anzugleichen
 %farbe_zuweisen(MaxRadius,Radius,MaxGeneration,Generation,Streckung,Key       ,InterpolationsFarben,Farbe)
-farbe_zuweisen(_,_,_,_,_,_,[A],A).
-farbe_zuweisen( _        ,_     ,_            ,_         ,_        ,random    ,InterpolationsFarben,Farbe) :-
-	random(Wert)
-	, interpolieren(InterpolationsFarben,Wert,Farbe)
-.
 farbe_zuweisen(_				 ,_     ,_            ,_         ,_        ,fullrandom,_                   ,Farbe) :-
 	random(1,254,R)
 	, random(1,254,G)
 	, random(1,254,B)
 	, Farbe = R/G/B
+.
+farbe_zuweisen(_,_,_,_,_,_,[A],A).
+farbe_zuweisen( _        ,_     ,_            ,_         ,_        ,random    ,InterpolationsFarben,Farbe) :-
+	random(Wert)
+	, interpolieren(InterpolationsFarben,Wert,Farbe)
 .
 farbe_zuweisen(_        ,_      ,_            ,_         ,_         ,diskret  ,InterpolationsFarben,Farbe) :-
 	length(InterpolationsFarben,L)

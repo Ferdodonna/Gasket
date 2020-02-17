@@ -1,4 +1,4 @@
 This project is all about those guys:
 
 
-![alt text](C:\Users\suuuj\Desktop)
+![alt text](p/cap1.png)

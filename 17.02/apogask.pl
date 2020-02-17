@@ -115,6 +115,20 @@ naechste_loesung(Kreis1,Kreis2,Kreis3,Vorherige,Naechste) :-
   , Naechste = kreis(XZ/YZ,RZ)
 .
 
+mu(0.000001).
+
+validate(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3)) :-
+  mu(Mu)
+
+  , abstand(P1,P2,D12)
+  , abstand(P2,P3,D23)
+  , abstand(P1,P3,D13)
+
+  , Mu > abs(D12-R1-R2)
+  , Mu > abs(D23-R2-R3)
+  , Mu > abs(D13-R1-R3)
+.
+
 /*
 Unsere vorige Implementation hatte ein paar Fehler, also habe ich das Ganze
 nochmal implementiert mit baue_kreise/7,schleife/7,durchlauf/6.
@@ -226,7 +240,6 @@ durchlauf(
 % Key gibt den Modus an nach dem die Farbe kreiert werden soll
 % Streckung gibt Wert an durch welchen P potenziert werden soll um die Verteilung mehr anzugleichen
 %farbe_zuweisen(MaxRadius,Radius,MaxGeneration,Generation,Streckung,Key       ,InterpolationsFarben,Farbe)
-farbe_zuweisen(_,_,_,_,_,_,[A],A) :- !.
 farbe_zuweisen( _        ,_     ,_            ,_         ,_        ,random    ,InterpolationsFarben,Farbe) :-
 	random(Wert)
 	, interpolieren(InterpolationsFarben,Wert,Farbe)
@@ -253,7 +266,7 @@ interpolieren(Vs,P,R) :-
 .
 
 % kreiert svg script für einen Kreis
-kreis_zu_svg(MaxGeneration,MaxRadius,Key,kreis(X/Y,Radius)-Generation,Farbpalette,Str) :-
+kreis_zu_svg(MaxGeneration,MaxRadius,Key,Farbpalette,kreis(X/Y,Radius)-Generation,Str) :-
 	farbe_zuweisen(MaxRadius,Radius,MaxGeneration,Generation,1/4,Key,Farbpalette,Cr/Cg/Cb)
 	, RadiusBetrag is abs(Radius)
 	, format(
@@ -262,16 +275,8 @@ kreis_zu_svg(MaxGeneration,MaxRadius,Key,kreis(X/Y,Radius)-Generation,Farbpalett
 	)
 .
 
-kreis_zu_svg_farbe(Cr/Cg/Cb,kreis(X/Y,Radius)-_,Str) :-
-	RadiusBetrag is abs(Radius)
-	, format(
-		atom(Str)
-		,'<circle cx="~5f" cy="~5f" r="~5f" stroke="none" stroke_width="1" fill="#~|~`0t~16r~2+~|~`0t~16r~2+~|~`0t~16r~2+" />\n', [X,Y,RadiusBetrag,Cr,Cg,Cb]
-	)
-.
-
 % kreiert svg datei mit Kreisen
-baue_svg(KreisAussen,FarbeAussen,Kreise,Name,FarbenKey,MaxGeneration,MaxRadius,Farbpalette) :-
+baue_svg(Kreise,Name,FarbenKey,MaxGeneration,MaxRadius,Farbpalette) :-
 	open(Name, write, Out)
 	, maplist(box, Kreise, Boxen)
 	, foldl(max_fn, Boxen, [100000, -100000, 100000, -100000], [Links, Rechts, Oben, Unten])
@@ -282,11 +287,6 @@ baue_svg(KreisAussen,FarbeAussen,Kreise,Name,FarbenKey,MaxGeneration,MaxRadius,F
 	, maplist(kreis_zu_svg(MaxGeneration,MaxRadius,FarbenKey,Farbpalette), Kreise, Strings)
 	, write(Out,'<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="20cm" height="20cm" ')
 	, format(Out, 'viewBox="~d ~d ~d ~d">', [LinksRounded, ObenRounded, Width, Height])
-	, (FarbeAussen = _/_/_ ->
-			kreis_zu_svg_farbe(FarbeAussen,KreisAussen,StringAussen)
-			; kreis_zu_svg(MaxGeneration,MaxRadius,FarbenKey,Farbpalette,KreisAussen,StringAussen)
-		)
-	, write(Out,StringAussen)
 	, maplist(write(Out), Strings)
 	, write(Out, '</svg>')
 	, close(Out)
@@ -304,13 +304,12 @@ box(kreis(X/Y,R)-_,[X-R,X+R,Y-R,Y+R]).
 test :-
 	% Wir bekommen als Argumente
 	% Radius1, Radius2, Radius3, MaxGenerationen, MinimalerRadius, MaxKreisanzahl, Farbmodus (radius,generation oder random), name svg-datei
-	baue_kreise(100,200,100,10,-1,-1,[Y-_|X])
+	baue_kreise(100,200,100,10,-1,-1,[Y-T|X])
 	% hier Generationen herausfiltern
 	% filter_generation([Y-T|X],2,5,[A-K|B])
 	% radius(A,R)
 	% baus_svg([A-K|B],'hans.svg',radius,4,abs(R))
 	, radius(Y,R)
-	, GasketFarbe = 179/16/7 % -1 wenn Äußerer Kreis mit anderen Kreisen koloriert werden soll
 	, Farbpalette = [179/16/7, 20/75/224, 67/189/40]
-	, baue_svg(Y,GasketFarbe,[X],'hans.svg',radius,4,abs(R),Farbpalette)
+	, baue_svg([Y-T|X],'hans.svg',radius,4,abs(R),Farbpalette)
 .

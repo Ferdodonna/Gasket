@@ -114,21 +114,6 @@ naechste_loesung(Kreis1,Kreis2,Kreis3,Vorherige,Naechste) :-
   , YZ is (2 * (L1*Y1 + L2*Y2 + L3*Y3) - LE*Ye) / LZ
   , Naechste = kreis(XZ/YZ,RZ)
 .
-
-mu(0.000001).
-
-validate(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3)) :-
-  mu(Mu)
-
-  , abstand(P1,P2,D12)
-  , abstand(P2,P3,D23)
-  , abstand(P1,P3,D13)
-
-  , Mu > abs(D12-R1-R2)
-  , Mu > abs(D23-R2-R3)
-  , Mu > abs(D13-R1-R3)
-.
-
 /*
 Unsere vorige Implementation hatte ein paar Fehler, also habe ich das Ganze
 nochmal implementiert mit baue_kreise/7,schleife/7,durchlauf/6.
@@ -245,6 +230,18 @@ farbe_zuweisen( _        ,_     ,_            ,_         ,_        ,random    ,I
 	random(Wert)
 	, interpolieren(InterpolationsFarben,Wert,Farbe)
 .
+farbe_zuweisen(_				 ,_     ,_            ,_         ,_        ,fullrandom,_                   ,Farbe) :-
+	random(1,254,R)
+	, random(1,254,G)
+	, random(1,254,B)
+	, Farbe = R/G/B
+.
+farbe_zuweisen(_        ,_      ,_            ,_         ,_         ,diskret  ,InterpolationsFarben,Farbe) :-
+	length(InterpolationsFarben,L)
+	, Laenge is L - 1
+	, random(0,Laenge,Index)
+	, nth0(Index,InterpolationsFarben,Farbe)
+.
 farbe_zuweisen( MaxRadius,Radius,_            ,_         ,Streckung,radius    ,InterpolationsFarben,Farbe) :-
 	P is (abs(Radius)/MaxRadius)^Streckung
 	, interpolieren(InterpolationsFarben,max(0,min(1,P)),Farbe)
@@ -312,5 +309,25 @@ test :-
 	% baus_svg([A-K|B],'hans.svg',radius,4,abs(R))
 	, radius(Y,R)
 	, Farbpalette = [179/16/7, 20/75/224, 67/189/40]
-	, baue_svg([Y-T|X],'hans.svg',random,4,abs(R),Farbpalette)
+	, baue_svg([Y-T|X],'hans.svg',diskret,4,abs(R),Farbpalette)
+.
+
+generate(
+	Radius1
+	, Radius2
+	, Radius3
+	, Ausgabepfad
+	, Generationen
+	, KreisAnzahl
+	, MinimalerKreisRadius
+	, GenerationenFilter
+	, HintergrundFarbe
+	, FarbenAlgorithmus % radius, generation, random, diskret
+	, Farbpalette
+) :-
+	baue_kreise(Radius1, Radius2, Radius3, Generationen, MinimalerKreisRadius, KreisAnzahl, Kreise)
+	, filter_generation(Kreise,GenerationenFilter,KreiseGefiltert)
+	, Kreise = [Y-_|_]
+	, radius(Y,R)
+	, baue_svg(KreiseGefiltert, Ausgabepfad, FarbenAlgorithmus, Generationen, abs(R), Farbpalette)
 .

@@ -311,5 +311,5 @@ test :-
 	% baus_svg([A-K|B],'hans.svg',radius,4,abs(R))
 	, radius(Y,R)
 	, Farbpalette = [179/16/7, 20/75/224, 67/189/40]
-	, baue_svg([Y-T|X],'hans.svg',radius,4,abs(R),Farbpalette)
+	, baue_svg([Y-T|X],'hans.svg',random,4,abs(R),Farbpalette)
 .

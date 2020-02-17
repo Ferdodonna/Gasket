@@ -1,4 +1,4 @@
 This project is all about those guys:
 
 
-![alt text](p/cap1.png)
+![alt text](p/cap1.png?raw=true)

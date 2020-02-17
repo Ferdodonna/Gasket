@@ -71,7 +71,7 @@ move(D,gerade(X/Y,G),Rx/Ry) :-
     , Ry is Y + Ty)
 .
 print(A) :- write(A),nl.
-% Berechnet zu zwei tangierenden Kreisen zwei die beiden tangierende Kreise mit Radius R3
+% Berechnet zu zwei tangierenden Kreisen einen der beiden möglichen weiteren tangierenden Kreise
 tangierender_kreis_mit_radius(kreis(P1,R1),kreis(P2,R2),R3,kreis(P3,R3)) :-
   A is R2+R3
   , B is R3+R1

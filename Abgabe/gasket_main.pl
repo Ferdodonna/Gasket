@@ -14,8 +14,8 @@ hilfe_anzeigen(KommandoZeile, OptionenSpezifikation) :-
 .
 
 % Programmstart
-main(KommandoZeile) :-
-	!
+main(KommandoZeile)
+:-
 	% Mögliche Optionen Spezifizieren
 	, OptionenSpezifikation = [
 		[opt(ausgabepfad), shortflags([o]), longflags([output]), default('gasket.svg'), help('Name der zu erzeugenden .svg Datei.')]
@@ -70,10 +70,6 @@ main(KommandoZeile) :-
 			, (member(farbe_zufall_palette_interpolierend(true), Optionen), Farbmodus = zufall_palette_interpolierend; true)
 			, (member(farbe_generation_interpolierend(true), Optionen), Farbmodus = generation_interpolierend; true)
 			, (Farbmodus = generation; true)
-			
-			, write([Radius1
-				, Radius2
-				, Radius3, Farbmodus])
 			
 			% Generierung aufrufen
 			, !

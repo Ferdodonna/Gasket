@@ -1,0 +1,1 @@
+prolog -o gasket.exe -c main.pl --goal=main

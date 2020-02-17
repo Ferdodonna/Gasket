@@ -115,6 +115,20 @@ naechste_loesung(Kreis1,Kreis2,Kreis3,Vorherige,Naechste) :-
   , Naechste = kreis(XZ/YZ,RZ)
 .
 
+mu(0.000001).
+
+validate(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3)) :-
+  mu(Mu)
+
+  , abstand(P1,P2,D12)
+  , abstand(P2,P3,D23)
+  , abstand(P1,P3,D13)
+
+  , Mu > abs(D12-R1-R2)
+  , Mu > abs(D23-R2-R3)
+  , Mu > abs(D13-R1-R3)
+.
+
 /*
 Unsere vorige Implementation hatte ein paar Fehler, also habe ich das Ganze
 nochmal implementiert mit baue_kreise/7,schleife/7,durchlauf/6.
@@ -222,18 +236,20 @@ durchlauf(
 	)
 .
 
-
-%farbe_zuweisen(MaxRadius,Radius,MaxGeneration,Generation,Stauchung,Key       ,InterpolationsFarben,Farbe)
+% kreiert farbe:
+% Key gibt den Modus an nach dem die Farbe kreiert werden soll
+% Streckung gibt Wert an durch welchen P potenziert werden soll um die Verteilung mehr anzugleichen
+%farbe_zuweisen(MaxRadius,Radius,MaxGeneration,Generation,Streckung,Key       ,InterpolationsFarben,Farbe)
 farbe_zuweisen( _        ,_     ,_            ,_         ,_        ,random    ,InterpolationsFarben,Farbe) :-
 	random(Wert)
 	, interpolieren(InterpolationsFarben,Wert,Farbe)
 .
-farbe_zuweisen( MaxRadius,Radius,_            ,_         ,Stauchung,radius    ,InterpolationsFarben,Farbe) :-
-	P is (abs(Radius)/MaxRadius)^Stauchung
+farbe_zuweisen( MaxRadius,Radius,_            ,_         ,Streckung,radius    ,InterpolationsFarben,Farbe) :-
+	P is (abs(Radius)/MaxRadius)^Streckung
 	, interpolieren(InterpolationsFarben,max(0,min(1,P)),Farbe)
 .
-farbe_zuweisen( _        ,_     ,MaxGeneration,Generation,Stauchung,generation,InterpolationsFarben,Farbe) :-
-	P is (Generation/MaxGeneration)^Stauchung
+farbe_zuweisen( _        ,_     ,MaxGeneration,Generation,Streckung,generation,InterpolationsFarben,Farbe) :-
+	P is (Generation/MaxGeneration)^Streckung
 	, interpolieren(InterpolationsFarben,max(0,min(1,P)),Farbe)
 .
 
@@ -249,6 +265,7 @@ interpolieren(Vs,P,R) :-
 	, interpolieren(WertLinks,WertRechts,Prel,R)
 .
 
+% kreiert svg script für einen Kreis
 kreis_zu_svg(MaxGeneration,MaxRadius,Key,kreis(X/Y,Radius)-Generation,Str) :-
 	farbe_zuweisen(MaxRadius,Radius,MaxGeneration,Generation,1/4,Key,[179/16/7, 20/75/224, 67/189/40],Cr/Cg/Cb)
 	, RadiusBetrag is abs(Radius)
@@ -258,7 +275,7 @@ kreis_zu_svg(MaxGeneration,MaxRadius,Key,kreis(X/Y,Radius)-Generation,Str) :-
 	)
 .
 
-
+% kreiert svg datei mit Kreisen
 baue_svg(Kreise,Name,FarbenKey,MaxGeneration,MaxRadius) :-
 	open(Name, write, Out)
 	, maplist(box, Kreise, Boxen)
@@ -294,154 +311,4 @@ test :-
 	% baus_svg([A-K|B],'hans.svg',radius,4,abs(R))
 	, radius(Y,R)
 	, baue_svg([Y-T|X],'hans.svg',radius,4,abs(R))
-.
-
-
-%
-%
-% VORIGE IMPLEMENTATION
-%
-%
-
-% Konvertiert den übergebenen Kreis in eine svg definition
-kreis2svg(ColorFn,MaxGen,kreis(X/Y,Radius)-_,Str) :-
-	call(ColorFn, (Radius/MaxGen)^(1/4), Cr/Cg/Cb)
-	, RadiusBetrag is abs(Radius)
-	, format(
-		atom(Str)
-		,'<circle cx="~5f" cy="~5f" r="~5f" stroke="none" stroke_width="1" fill="#~|~`0t~16r~2+~|~`0t~16r~2+~|~`0t~16r~2+" />\n', [X,Y,RadiusBetrag,Cr,Cg,Cb]
-	)
-.
-
-kreise2svg(Kreise, Name) :-
-	open(Name, write, Out)
-	, maplist(box, Kreise, Boxen)
-	, foldl(max_fn, Boxen, [100000, -100000, 100000, -100000], [Links, Rechts, Oben, Unten])
-	, LinksRounded = floor(Links)
-	, ObenRounded = floor(Oben)
-	, Width is ceil(Rechts - Links)
-	, Height is ceil(Unten - Oben)
-	, maplist(kreis2svg(color,234), Kreise, Strings)
-	, write(Out,'<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="20cm" height="20cm" ')
-	, format(Out, 'viewBox="~d ~d ~d ~d">', [LinksRounded, ObenRounded, Width, Height])
-	, maplist(write(Out), Strings)
-	, write(Out, '</svg>')
-	, close(Out)
-	, !
-.
-
-% Führt die Berechnung eines Neuen Kreises mithilfe des ersten Queue-Quartupels durch
-iteriere(
-	QueueBisher-QueueBisherEnde
-	, _KreiseBisher-KreiseBisherEnde
-	, _KreiseNeu-KreiseNeuEnde
-	, QueueNeu-QueueNeuEnde
-	, AnzahlGenerationen
-	, MinimalerRadius
-) :-
-	QueueBisher = [ (Kreis1/Kreis2/Kreis3/KreisLoesung)-Generation | QueueNeu ]
-	, naechste_loesung(Kreis1,Kreis2,Kreis3,KreisLoesung,KreisNeu)
-
-	, (
-		% Iteration nur erlauben, wenn Beschränkungen erfüllt sind:
-		(Generation =< AnzahlGenerationen; MinimalerRadius < 0; radius(KreisNeu, RadiusNeu), RadiusNeu >= MinimalerRadius)
-
-		% Neuen Kreis in KreiseNeu schreiben
-		, KreiseBisherEnde = [KreisNeu|KreiseNeuEnde]
-
-		% Neue Quartupel in Queue legen
-		, KindGeneration is Generation + 1
-		, QueueBisherEnde = [
-				(KreisNeu/Kreis1/Kreis3/Kreis2)-KindGeneration
-				,(KreisNeu/Kreis2/Kreis3/Kreis1)-KindGeneration
-				,(KreisNeu/Kreis1/Kreis2/Kreis3)-KindGeneration
-				| QueueNeuEnde
-			]
-	)
-
-	% Ansonsten überspringen
-	; (
-		KreiseBisherEnde = KreiseNeuEnde
-		, QueueBisherEnde = QueueNeuEnde
-	)
-.
-
-iterationen(
-	QueueBisher-QueueBisherEnde
-	, KreiseBisher-KreiseBisherEnde
-	, KreiseNeu-KreiseNeuEnde
-	, QueueNeu-QueueNeuEnde
-	, KreisAnzahlBisher
-	, AnzahlGenerationen
-	, MinimalerRadius
-	, MaximaleKreisAnzahl
-) :-
-
-	% Maximale Anzahl von Kreisen beachten
-	(MaximaleKreisAnzahl =< 0; KreisAnzahlBisher < MaximaleKreisAnzahl)
-
-	% Eine Iteration ausführen
-	, iteriere(
-		QueueBisher-QueueBisherEnde
-		, KreiseBisher-KreiseBisherEnde
-		, KreiseNeu-KreiseNeuEnde
-		, QueueNeu-QueueNeuEnde
-		, AnzahlGenerationen
-		, MinimalerRadius
-	)
-
-	% Wenn erfolgreich und keine Bedingungen verletzt, nächste Iteration aufrufen
-	, !
-	, KreisAnzahlNeu is KreisAnzahlBisher + 1
-	, iterationen(
-		QueueBisher-QueueBisherEnde
-		, KreiseBisher-KreiseBisherEnde
-		, KreiseNeu-KreiseNeuEnde
-		, QueueNeu-QueueNeuEnde
-		, KreisAnzahlNeu
-		, AnzahlGenerationen
-		, MinimalerRadius
-		, MaximaleKreisAnzahl
-	)
-.
-
-
-% Wenn Iteration nicht möglich, Ergebnisse zurückgeben
-iterieren(QueueBisher-[],_KreiseBisher-[],_KreiseNeu-[],QueueBisher-[],_KreisAnzahlBisher,_,_,_).
-
-% Führt die gesamte Generierung durch
-generiere_kreise(
-	Radius1
-	, Radius2
-	, Radius3
-	, AnzahlGenerationen
-	, MinimalerRadius
-	, MaximaleKreisAnzahl
-	, Kreise
-) :-
-
-	% Ersten beiden Startkreise brechnen
-	Kreis1 = kreis(-Radius1/0,Radius1)
-	, Kreis2 = kreis(Radius2/0,Radius2)
-
-	% Einen der beiden möglichen tangierenden Kreise als dritten Startkreis nehmen
-	, tangierender_kreis_mit_radius(Kreis1,Kreis2,Radius3,Kreis3,_)
-	, write(Kreis3)
-	% Umschreibenden Kreis berechnen
-	, umschreibender_kreis(Kreis1,Kreis2,Kreis3,KreisUmschreibend)
-
-	% Initiale Queue berechnen
-	, initiale_queue(Kreis1,Kreis2,Kreis3,KreisUmschreibend,Queue-QueueEnde)
-
-	% Alle möglichen Iterationen ausführen
-	, iterationen(
-		Queue-QueueEnde
-		, [KreisUmschreibend-0,Kreis1-0,Kreis2-0,Kreis3-0|KreiseEnde]-KreiseEnde
-		, Kreise-_
-		, _ % Resultierende Queue
-		, 4 % Aktuelle Kreisanzahl
-		, AnzahlGenerationen
-		, MinimalerRadius
-		, MaximaleKreisAnzahl
-	)
 .

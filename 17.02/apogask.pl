@@ -326,7 +326,7 @@ test :-
 	baue_kreise(100,200,300,-1,0.1,-1,[Y-T|X])
 	, radius(Y,R)
 	, Farbpalette = [20/75/224,67/189/40,0/0/0,255/255/255]%[179/16/7, 20/75/224, 67/189/40]
-	, Domain = 1\/3\/5\/7\/9..sup
+	, Domain = 0\/2..5\/8..sup
 	, filter_generation(X,Domain,XF)
 	, baue_svg([Y-T|XF],'hans.svg',wechseln,10,abs(R),Farbpalette)
 .

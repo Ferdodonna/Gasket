@@ -1,4 +1,4 @@
 This project is all about those guys:
 
 
-![alt text](p/cap1.png?raw=true)
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/p/cap1.PNG)

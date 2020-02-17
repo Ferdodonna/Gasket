@@ -236,6 +236,11 @@ farbe_zuweisen( _        ,_     ,_            ,_         ,_        ,random    ,I
 	random(Wert)
 	, interpolieren(InterpolationsFarben,Wert,Farbe)
 .
+farbe_zuweisen(_        ,_      ,_            ,Generation,_         ,wechseln ,InterpolationsFarben,Farbe) :-
+	length(InterpolationsFarben,Laenge)
+	, Index is mod(Generation,Laenge)
+	, nth0(Index,InterpolationsFarben,Farbe)
+.
 farbe_zuweisen(_        ,_      ,_            ,_         ,_         ,diskret  ,InterpolationsFarben,Farbe) :-
 	length(InterpolationsFarben,L)
 	, Laenge is L - 1

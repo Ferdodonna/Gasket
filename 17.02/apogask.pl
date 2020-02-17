@@ -115,20 +115,6 @@ naechste_loesung(Kreis1,Kreis2,Kreis3,Vorherige,Naechste) :-
   , Naechste = kreis(XZ/YZ,RZ)
 .
 
-mu(0.000001).
-
-validate(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3)) :-
-  mu(Mu)
-
-  , abstand(P1,P2,D12)
-  , abstand(P2,P3,D23)
-  , abstand(P1,P3,D13)
-
-  , Mu > abs(D12-R1-R2)
-  , Mu > abs(D23-R2-R3)
-  , Mu > abs(D13-R1-R3)
-.
-
 /*
 Unsere vorige Implementation hatte ein paar Fehler, also habe ich das Ganze
 nochmal implementiert mit baue_kreise/7,schleife/7,durchlauf/6.

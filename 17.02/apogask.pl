@@ -115,8 +115,6 @@ validate(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3)) :-
 
 % berechnet zweiten tangierenden Kreis zu drei tangierenden Kreisen
 % falls man den ersten bereits berechnet hat
-% benutzt Vietas Theorem welches bei einer Gleichung mit zwei Lösungen die
-% zweite Lösung findet wenn man die Erste bereits hat
 naechste_loesung(Kreis1,Kreis2,Kreis3,Vorherige,Naechste) :-
 
   % Radius berechnen
@@ -131,11 +129,6 @@ naechste_loesung(Kreis1,Kreis2,Kreis3,Vorherige,Naechste) :-
   , YZ is (2 * (L1*Y1 + L2*Y2 + L3*Y3) - LE*Ye) / LZ
   , Naechste = kreis(XZ/YZ,RZ)
 .
-/*
-Unsere vorige Implementation hatte ein paar Fehler, also habe ich das Ganze
-nochmal implementiert mit baue_kreise/7,schleife/7,durchlauf/6.
-Die vorige Implementation findest du ganz unten.
-*/
 
 % berechnet Kreise
 baue_kreise(

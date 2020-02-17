@@ -55,8 +55,8 @@ baryzentrisch2kartesisch(
 
 % Vektor zwischen zwei Punkten
 abstand_vektor(X1/Y1,X2/Y2,X/Y) :-
-  X is X1 - X2
-  , Y is Y1 - Y2
+  X is X2 - X1
+  , Y is Y2 - Y1
 .
 
 % bewege Punkt X,Y mit dem Gradienten die Distanz D und bekomme Rx,Ry
@@ -70,30 +70,47 @@ move(D,gerade(X/Y,G),Rx/Ry) :-
     Rx is X + Tx
     , Ry is Y + Ty)
 .
-
+print(A) :- write(A),nl.
 % Berechnet zu zwei tangierenden Kreisen zwei die beiden tangierende Kreise mit Radius R3
-tangierender_kreis_mit_radius(kreis(P1,R1),kreis(P2,R2),R3,kreis(P3A,R3),kreis(P3B,R3)) :-
+tangierender_kreis_mit_radius(kreis(P1,R1),kreis(P2,R2),R3,kreis(P3,R3)) :-
   A is R2+R3
   , B is R3+R1
   , C is R1+R2
-  , WBAC is acos((A*A - B*B - C*C) / (-2 * B * C))
+
+	, (
+	A >= B, A >= C, !
+	, W is acos((B*B - A*A - C*C) / (-2 * A * C))
+	, abstand_vektor(P2,P1,X/Y)
+	, Sin is sin(W)
+	, Cos is cos(W)
+	, XV3 is X * Cos - Y * Sin
+	, YV3 is X * Sin + Y * Cos
+	, G is YV3 / XV3
+	, move(-A,gerade(P2,G),P3)
+	;
+  W is acos((A*A - B*B - C*C) / (-2 * B * C))
   , abstand_vektor(P1,P2,X/Y)
+  , Sin is sin(W)
+  , Cos is cos(W)
+  , XV3 is X * Cos - Y * Sin
+  , YV3 is X * Sin + Y * Cos
+  , G is YV3 / XV3
+  , move(B,gerade(P1,G),P3)
+	)
+.
 
-  % Punkt P3A
-  , Sin1 is sin(WBAC)
-  , Cos1 is cos(WBAC)
-  , X13A is X * Cos1 - Y * Sin1
-  , Y13A is X * Sin1 + Y * Cos1
-  , GA is Y13A / X13A
-  , move(B,gerade(P1,GA),P3A)
+mu(0.000001).
 
-  % Punkt P3B
-  , Sin2 is sin(pi-WBAC)
-  , Cos2 is cos(pi-WBAC)
-  , X13B is X * Cos2 - Y * Sin2
-  , Y13B is X * Sin2 + Y * Cos2
-  , GB is Y13B / X13B
-  , move(B,gerade(P1,GB),P3B)
+validate(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3)) :-
+  mu(Mu)
+
+  , abstand(P1,P2,D12)
+  , abstand(P2,P3,D23)
+  , abstand(P1,P3,D13)
+
+  , Mu > abs(D12-R1-R2)
+  , Mu > abs(D23-R2-R3)
+  , Mu > abs(D13-R1-R3)
 .
 
 % berechnet zweiten tangierenden Kreis zu drei tangierenden Kreisen
@@ -132,7 +149,7 @@ baue_kreise(
 
 		Kreis1 = kreis(-Radius1/0,Radius1)
 		, Kreis2 = kreis(Radius2/0,Radius2)
-		, tangierender_kreis_mit_radius(Kreis1,Kreis2,Radius3,Kreis3,_)
+		, tangierender_kreis_mit_radius(Kreis1,Kreis2,Radius3,Kreis3)
 		, umschreibender_kreis(Kreis1,Kreis2,Kreis3,KreisUmschreibend)
 		, initiale_queue(Kreis1,Kreis2,Kreis3,KreisUmschreibend,InitialeQueue)
 		, schleife(
@@ -225,6 +242,7 @@ durchlauf(
 % Key gibt den Modus an nach dem die Farbe kreiert werden soll
 % Streckung gibt Wert an durch welchen P potenziert werden soll um die Verteilung mehr anzugleichen
 %farbe_zuweisen(MaxRadius,Radius,MaxGeneration,Generation,Streckung,Key       ,InterpolationsFarben,Farbe)
+
 farbe_zuweisen(_				 ,_     ,_            ,_         ,_        ,fullrandom,_                   ,Farbe) :-
 	random(1,254,R)
 	, random(1,254,G)
@@ -256,8 +274,8 @@ farbe_zuweisen( _        ,_     ,MaxGeneration,Generation,Streckung,generation,I
 	, interpolieren(InterpolationsFarben,max(0,min(1,P)),Farbe)
 .
 
-interpolieren(F,T,P,R) :- R is round(F * (1 - P) + T * P).
 interpolieren(Fr/Fg/Fb,Tr/Tg/Tb,P,Rr/Rg/Rb) :- interpolieren(Fr,Tr,P,Rr), interpolieren(Fg,Tg,P,Rg),interpolieren(Fb,Tb,P,Rb).
+interpolieren(F,T,P,R) :- R is round(F * (1 - P) + T * P).
 interpolieren(Vs,P,R) :-
 	length(Vs,S)
 	, Links is floor(P * (S-1))
@@ -305,18 +323,15 @@ max_fn([Links1, Rechts1, Oben1, Unten1], [Links2, Rechts2, Oben2, Unten2], [Link
 box(kreis(X/Y,R)-_,[X-R,X+R,Y-R,Y+R]).
 
 test :-
-	% Wir bekommen als Argumente
-	% Radius1, Radius2, Radius3, MaxGenerationen, MinimalerRadius, MaxKreisanzahl, Farbmodus (radius,generation oder random), name svg-datei
-	baue_kreise(100,200,100,10,-1,-1,[Y-T|X])
-	% hier Generationen herausfiltern
-	% filter_generation([Y-T|X],2,5,[A-K|B])
-	% radius(A,R)
-	% baus_svg([A-K|B],'hans.svg',radius,4,abs(R))
+	baue_kreise(100,200,300,-1,0.1,-1,[Y-T|X])
 	, radius(Y,R)
-	, Farbpalette = [179/16/7, 20/75/224, 67/189/40]
-	, baue_svg([Y-T|X],'hans.svg',diskret,4,abs(R),Farbpalette)
+	, Farbpalette = [20/75/224,67/189/40,0/0/0,255/255/255]%[179/16/7, 20/75/224, 67/189/40]
+	, Domain = 1\/3\/5\/7\/9..sup
+	, filter_generation(X,Domain,XF)
+	, baue_svg([Y-T|XF],'hans.svg',wechseln,10,abs(R),Farbpalette)
 .
 
+/*
 generate(
 	Radius1
 	, Radius2
@@ -326,8 +341,7 @@ generate(
 	, KreisAnzahl
 	, MinimalerKreisRadius
 	, GenerationenFilter
-	, HintergrundFarbe
-	, FarbenAlgorithmus % radius, generation, random, diskret
+	, FarbenAlgorithmus
 	, Farbpalette
 ) :-
 	baue_kreise(Radius1, Radius2, Radius3, Generationen, MinimalerKreisRadius, KreisAnzahl, Kreise)
@@ -335,4 +349,13 @@ generate(
 	, Kreise = [Y-_|_]
 	, radius(Y,R)
 	, baue_svg(KreiseGefiltert, Ausgabepfad, FarbenAlgorithmus, Generationen, abs(R), Farbpalette)
+.
+*/
+filter_generation([],_,[]).
+filter_generation([Kreis-Generation|KreiseUngefiltert],Domain,[Kreis-Generation|KreiseGefiltert]) :-
+	Generation in Domain
+	, filter_generation(KreiseUngefiltert,Domain,KreiseGefiltert)
+.
+filter_generation([_|KreiseUngefiltert],Domain,KreiseGefiltert) :-
+	filter_generation(KreiseUngefiltert,Domain,KreiseGefiltert)
 .

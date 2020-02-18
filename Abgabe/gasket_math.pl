@@ -43,7 +43,6 @@ umschreibender_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),kreis(UmschreibendPo
 kehr(V,1/V).
 
 % Berechnet die zweite Lösung (den zweiten zu drei paarweise tangierenden Kreisen tangierenden Kreis) mithilfe der ersten Lösung
-% Vietas Theorem: Bei einer Gleichung mit zwei Lösungen ist die zweite Lösung einfacher deduzierbar, wenn man die Erste bereits hat
 naechste_loesung(
 	Kreis1
 	, Kreis2

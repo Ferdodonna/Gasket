@@ -1,10 +1,10 @@
 This project is all about those guys:
 
 
-![alt text](https://github.com/Ferdodonna/Gasket/blob/master/p/cap5.PNG)
-![alt text](https://github.com/Ferdodonna/Gasket/blob/master/p/cap2.PNG)
-![alt text](https://github.com/Ferdodonna/Gasket/blob/master/p/cap3.PNG)
-![alt text](https://github.com/Ferdodonna/Gasket/blob/master/p/cap4.PNG)
-![alt text](https://github.com/Ferdodonna/Gasket/blob/master/p/cap6.jpeg)
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/example1.PNG)
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/example2.PNG)
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/example3.PNG)
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/example4.PNG)
+
 
 

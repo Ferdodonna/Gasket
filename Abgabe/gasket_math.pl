@@ -65,7 +65,8 @@ naechste_loesung(
 
 % Berechnet mit drei Radien die ersten drei Kreise
 initiale_kreise(Radius1, Radius2, Radius3, kreis(-Radius1/0,Radius1), kreis(Radius2/0,Radius2), kreis(Kreis3X/Kreis3Y,Radius3)) :-
-	Kreis3XNormalized is (Radius1*2*Radius1 + Radius1*2*Radius2 - Radius2*2*Radius3 + Radius3*2*Radius1) / 2 / (Radius1+Radius2)
+	Kreis3XNormalized is Radius1 + Radius3 * (Radius1 - Radius2) / (Radius1 + Radius2)
+	% (Radius1*2*Radius1 + Radius1*2*Radius2 - Radius2*2*Radius3 + Radius3*2*Radius1) / 2 / (Radius1+Radius2)
 	, Kreis3Y is sqrt( (Radius1 + Radius3) * (Radius1 + Radius3) - Kreis3XNormalized * Kreis3XNormalized)
 	, Kreis3X is Kreis3XNormalized - Radius1
 .

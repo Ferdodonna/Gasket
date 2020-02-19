@@ -17,7 +17,7 @@ hilfe_anzeigen(KommandoZeile, OptionenSpezifikation) :-
 main(KommandoZeile)
 :-
 	% Mögliche Optionen Spezifizieren
-	, OptionenSpezifikation = [
+	OptionenSpezifikation = [
 		[opt(ausgabepfad), shortflags([o]), longflags([output]), default('gasket.svg'), help('Name der zu erzeugenden .svg Datei.')]
 		, [opt(hilfe), shortflags([h]), longflags([help]), type(boolean), default('false'), help('Zeigt diese Hilfe an.')]
 		, [opt(generationen), shortflags([g]), longflags([generations]), type(integer), default(5), help('Anzahl der Generationen von Kreisen.')]

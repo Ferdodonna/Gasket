@@ -14,8 +14,7 @@ hilfe_anzeigen(KommandoZeile, OptionenSpezifikation) :-
 .
 
 % Programmstart
-main(KommandoZeile)
-:-
+main(KommandoZeile) :-
 	% Mögliche Optionen Spezifizieren
 	OptionenSpezifikation = [
 		[opt(ausgabepfad), shortflags([o]), longflags([output]), default('gasket.svg'), help('Name der zu erzeugenden .svg Datei.')]
@@ -31,6 +30,9 @@ main(KommandoZeile)
 		, [opt(farbe_generation), longflags(['generation-coloring']), type(boolean), default('false'), help('Stellt den modus es Einfärbens auf ''generation-basierend''.')]
 		, [opt(farbe_generation_interpolierend), longflags(['generation-coloring-interpolated']), type(boolean), default('false'), help('Stellt den modus es Einfärbens auf ''generation-basierend'', jedoch interpolierend.')]
 		, [opt(farbe_radius_interpolierend), longflags(['radius-coloring']), type(boolean), default('false'), help('Stellt den modus es Einfärbens auf ''radius-basierend''.')]
+		, [opt(nested_random), longflags(['random-nesting']), type(boolean), default('false'), help('Aktiviert zufallsbasiertes nesting von Gaskets.')]
+		, [opt(nested_scaled), longflags(['scaled-nesting']), type(boolean), default('false'), help('Aktiviert nesting von Gaskets mithilfe von skalierung.')]
+		, [opt(rotation), longflags(['rotation']), type(term), default(0), help('Rotiert das gasket um einen bestimmten Winkel (in Rad).')]
 	]
 	
 	% Kommandozeile parsen
@@ -52,6 +54,7 @@ main(KommandoZeile)
 			, member(generationen_filter(GenerationenFilter), Optionen)
 			, member(hintergrund_farbe(HintergrundFarbe), Optionen)
 			, member(gasket_farbe(GasketFarbe), Optionen)
+			, member(rotation(Rotation), Optionen)
 			
 			% Postionale Argumente Parsen
 			, PositionaleArgumente = [_, RadiusText1, RadiusText2, RadiusText3|FarbpaletteTexte]
@@ -69,6 +72,9 @@ main(KommandoZeile)
 			, (member(farbe_generation(true), Optionen), Farbmodus = generation; true)
 			, (member(farbe_zufall_palette_interpolierend(true), Optionen), Farbmodus = zufall_palette_interpolierend; true)
 			, (member(farbe_generation_interpolierend(true), Optionen), Farbmodus = generation_interpolierend; true)
+			, (member(nested_scaled(true), Optionen), Nesting = nested_gasket_scaled; true)
+			, (member(nested_random(true), Optionen), Nesting = nested_gasket_random; true)
+			, (Nesting = nested_gasket_off; true)
 			, (Farbmodus = generation; true)
 			
 			% Generierung aufrufen
@@ -77,10 +83,12 @@ main(KommandoZeile)
 				Radius1
 				, Radius2
 				, Radius3
+				, Rotation
 				, Ausgabepfad
 				, Generationen
 				, KreisAnzahl
 				, MinimalerKreisRadius
+				, Nesting
 				, GenerationenFilter
 				, GasketFarbe
 				, HintergrundFarbe

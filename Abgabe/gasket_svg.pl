@@ -1,7 +1,5 @@
 :- module(gasket_svg, [schreibe_svg/9]).
 
-:- use_module(library(clpfd)).
-
 % Interpoliert zwei oder eine Liste von Farben
 farbe_interpolieren(VonRot/VonGruen/VonBlau,NachRot/NachGruen/NachBlau,Prozentsatz,ErgebnisRot/ErgebnisGruen/ErgebnisBlau) :-
 	!

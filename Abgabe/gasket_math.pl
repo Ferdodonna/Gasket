@@ -1,4 +1,4 @@
-:- module(gasket_math, [radius/2, umschreibender_kreis/4, naechste_loesung/5, initiale_kreise/6]).
+:- module(gasket_math, [radius/2, umschreibender_kreis/4, naechste_loesung/5, initiale_kreise/6, skaliere_kreis/7, rotiere_kreis/4]).
 
 % Gibt Radius von Kreis zurück
 radius(kreis(_,Radius), Radius).
@@ -15,6 +15,23 @@ baryzentrisch2kartesisch(
 	U is A + B + C
 	, X is (A * X3 + B * X1 + C * X2) / U
 	, Y is (A * Y3 + B * Y1 + C * Y2) / U
+.
+
+% Transformiert einen Kreis anhand eines Skalierung und eines Offsets (X/Y)
+skaliere_kreis(kreis(KreisX/KreisY,KreisRadius), OffsetXPre, OffsetYPre, Skalierung, OffsetX, OffsetY, kreis(KreisNeuX/KreisNeuY, KreisNeuRadius)) :-
+	KreisNeuX is ( KreisX - OffsetXPre ) * Skalierung + OffsetX
+	, KreisNeuY is ( KreisY - OffsetYPre ) * Skalierung + OffsetY
+	, KreisNeuRadius is KreisRadius * Skalierung
+.
+
+% Rotiert einen Kreis um das Zentrum eines anderen
+rotiere_kreis(kreis(KreisX/KreisY,KreisRadius), kreis(RotationX/RotationY, _), Rotation, kreis(ErgebnisX/ErgebnisY, KreisRadius)) :-
+	DeltaX is KreisX - RotationX
+	, DeltaY is KreisY - RotationY
+	, Winkel is atan2(DeltaX, DeltaY) + Rotation
+	, Distanz is sqrt(DeltaX*DeltaX+DeltaY*DeltaY)
+	, ErgebnisX is cos(Winkel) * Distanz + RotationX
+	, ErgebnisY is sin(Winkel) * Distanz + RotationY
 .
 
 % Berechnet zu drei Kreisen den Umschreibenden Kreis
@@ -43,6 +60,7 @@ umschreibender_kreis(kreis(P1,R1),kreis(P2,R2),kreis(P3,R3),kreis(UmschreibendPo
 kehr(V,1/V).
 
 % Berechnet die zweite Lösung (den zweiten zu drei paarweise tangierenden Kreisen tangierenden Kreis) mithilfe der ersten Lösung
+% Vietas Theorem: Bei einer Gleichung mit zwei Lösungen ist die zweite Lösung einfacher deduzierbar, wenn man die Erste bereits hat
 naechste_loesung(
 	Kreis1
 	, Kreis2
@@ -65,8 +83,7 @@ naechste_loesung(
 
 % Berechnet mit drei Radien die ersten drei Kreise
 initiale_kreise(Radius1, Radius2, Radius3, kreis(-Radius1/0,Radius1), kreis(Radius2/0,Radius2), kreis(Kreis3X/Kreis3Y,Radius3)) :-
-	Kreis3XNormalized is Radius1 + Radius3 * (Radius1 - Radius2) / (Radius1 + Radius2)
-	% (Radius1*2*Radius1 + Radius1*2*Radius2 - Radius2*2*Radius3 + Radius3*2*Radius1) / 2 / (Radius1+Radius2)
+	Kreis3XNormalized is (Radius1*2*Radius1 + Radius1*2*Radius2 - Radius2*2*Radius3 + Radius3*2*Radius1) / 2 / (Radius1+Radius2)
 	, Kreis3Y is sqrt( (Radius1 + Radius3) * (Radius1 + Radius3) - Kreis3XNormalized * Kreis3XNormalized)
 	, Kreis3X is Kreis3XNormalized - Radius1
 .

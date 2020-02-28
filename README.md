@@ -54,6 +54,7 @@ Smallest value a circle radius can have: a floating point number, if this limite
 Nesting Algorithm: A nesting algorithm describes a way to draw additional circles into already drawn circles. We currently have three 
 
 options:
+          
           1. nested_gasket_off => no nesting algorithm
           
           2. nested_gasket_scaled => nesting algorithm that tries to copy the original gasket pattern into every circle, affected by limiters

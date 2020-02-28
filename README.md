@@ -59,7 +59,7 @@ Three inital radii: everything greater than 0
 
 Rotation: 0 - 2π
 
-Output path: needs an .svg ending!
+Output path: needs a .svg ending!
 
 Amount of generations to draw at least: a natural number, if this limiter should be ignored input -1
 
@@ -68,7 +68,6 @@ Amount of circles to draw at least: a natural number, if this limiter should be 
 Smallest value a circle radius can have: a floating point number, if this limiter should be ignored input -1
 
 Nesting Algorithm: A nesting algorithm describes a way to draw additional circles into already drawn circles. We currently have three 
-
 options:
           
           1. nested_gasket_off => no nesting algorithm

@@ -16,24 +16,36 @@ This project implements a script in Prolog that spits out [Apollian Gaskets](htt
 
 Using the provided SWI Prolog environment, you simply consult the gasket.pl and then execute the gasket/14 predicate. The gasket predicate works as follows:
 
-´´´prolog
+
 
 gasket( 
-      Radius1, Radius2, Radius3
-      , Rotation
-      , Output path for svg file
-      , Amount of generations to draw at least
-      , Amount of circles to draw at least
-      , Smallest value a circle radius can have
-      , nesting algorithm
-      , generationfilter via clpfd domains
-      , color of biggest circle
-      , background color
-      , coloring algorithm
-      , colors for coloring algorithm
+   
+    Radius1, Radius2, Radius3
+   
+   , Rotation
+   
+   , Output path for svg file
+   
+   , Amount of generations to draw at least
+   
+   , Amount of circles to draw at least
+   
+   , Smallest value a circle radius can have
+   
+   , nesting algorithm
+   
+   , generationfilter via clpfd domains
+   
+   , color of biggest circle
+   
+   , background color
+   
+   , coloring algorithm
+   
+   , colors for coloring algorithm
 
 )
-´´´
+
       
 So given the input 
 

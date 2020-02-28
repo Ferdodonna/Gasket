@@ -16,6 +16,7 @@ This project implements a script in Prolog that spits out [Apollian Gaskets](htt
 
 Using the provided SWI Prolog environment, you simply consult the gasket.pl and then execute the gasket/14 predicate. The gasket predicate works as follows:
 
+´´´
 gasket( 
 
 
@@ -44,6 +45,7 @@ Radius1, Radius2, Radius3
 , colors for coloring algorithm
 
 )
+´´´
       
 So given the input 
 

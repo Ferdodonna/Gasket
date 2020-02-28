@@ -19,31 +19,29 @@ you simply consult the gasket.pl and then execute the gasket/14 predicate. The g
 
 
 
-### gasket( 
+### gasket(    
+  ###      Radius1, Radius2, Radius3
+  ###      , Rotation
    
-  ### Radius1, Radius2, Radius3
+  ###      , Output path for svg file
    
-  ### , Rotation
+  ###      , Amount of generations to draw at least
    
-  ### , Output path for svg file
+  ###      , Amount of circles to draw at least
    
-  ### , Amount of generations to draw at least
+  ###      , Smallest value a circle radius can have
    
-  ### , Amount of circles to draw at least
+  ###      , nesting algorithm
    
-  ### , Smallest value a circle radius can have
+  ###      , generationfilter via clpfd domains
    
-  ### , nesting algorithm
+  ###      , color of biggest circle
    
-  ### , generationfilter via clpfd domains
+  ###      , background color
    
-  ### , color of biggest circle
+  ###      , coloring algorithm
    
-  ### , background color
-   
-  ### , coloring algorithm
-   
-  ### , colors for coloring algorithm
+  ###      , colors for coloring algorithm
 
 ### )
 

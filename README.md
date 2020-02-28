@@ -40,25 +40,40 @@ the script would draw the pattern from three starting circles all with a radius 
 Possible inputs for each argument:
 
 Three inital radii: everything greater than 0
-Rotation: 0 - 2π 
+
+Rotation: 0 - 2π
+
 Output path: needs an .svg ending!
+
 Amount of generations to draw at least: a natural number, if this limiter should be ignored input -1
+
 Amount of circles to draw at least: a natural number, if this limiter should be ignored input -1
+
 Smallest value a circle radius can have: a floating point number, if this limiter should be ignored input -1
-Nesting Algorithm: A nesting algorithm describes a way to draw additional circles into already drawn circles. We currently have three options:
+
+Nesting Algorithm: A nesting algorithm describes a way to draw additional circles into already drawn circles. We currently have three 
+
+options:
           1. nested_gasket_off => no nesting algorithm
           2. nested_gasket_scaled => nesting algorithm that tries to copy the original gasket pattern into every circle, affected by limiters
           3. nested_gasket_random => nesting algorithm that randomly draws apollian gaskets into circles, affected by limiters
+
 Generationfilter: Draws all generations in the given domain, to draw all generations input inf..sup
+
 Color of biggest circle: RGB value in the R/G/B format
+
 Background color: RGB value in the R/G/B format
+
 Coloring algorithm: Currently we have six coloring algorithms:
           1. zufall => random coloring using all possible colors
           2. zufall_palette => random coloring using the given colors
           3. zufall_palette_interpolierend => random coloring interpolating between the given colors
-          4. generation => given a list of colors C of the length L and the generation N, N being a natural number, the generation receives the color ((N mod L) + 1)th color in the list of colors
+          4. generation => given a list of colors C of the length L and the generation N, N being a natural number, the generation 
+   
+receives the color ((N mod L) + 1)th color in the list of colors
           5. generation_interpolierend => we interpolate between the given colors based on the generation
           6. radius_interpolierend => we interpolate between the given colors based on radius
+
 Colors: a list of colors, each color in the R/G/B format
 
 

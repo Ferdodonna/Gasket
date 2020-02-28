@@ -49,7 +49,7 @@ gasket(
       
 So given the input 
 
-gasket(100,100,100,3.1415,'gasket.svg',5,2200,0.1,nested_gasket_off,0\/2..sup,0/0/0,255/255/255,radius_interpolierend,[123/293/23,18/255/91])
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/example_input.PNG)
 
 the script would draw the pattern from three starting circles all with a radius of 100, go at least to generation 5/circle amount 2200/radius size 0.1, use no nesting algorithm, draw all generations but generation 1, make the biggest circle black and the background white, use the radius interpolation algorithm for coloring given the RGB colors (123,293,23) and (18,255,91).
 

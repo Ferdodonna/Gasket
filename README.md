@@ -21,7 +21,7 @@ you simply consult the gasket.pl and then execute the gasket/14 predicate. The g
 
 gasket( 
    
-    Radius1, Radius2, Radius3
+   Radius1, Radius2, Radius3
    
    , Rotation
    

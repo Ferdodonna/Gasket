@@ -48,7 +48,7 @@ you simply consult the gasket.pl and then execute the gasket/14 predicate. The g
       
 So given the input 
 
-![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/example_input.PNG)
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/input_example.PNG)
 
 the script would draw the pattern from three starting circles all with a radius of 100, go at least to generation 5/circle amount 2200/radius size 0.1, use no nesting algorithm, draw all generations but generation 1, make the biggest circle black and the background white, use the radius interpolation algorithm for coloring given the RGB colors (123,293,23) and (18,255,91).
 

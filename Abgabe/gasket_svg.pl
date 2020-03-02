@@ -1,5 +1,8 @@
 :- module(gasket_svg, [schreibe_svg/9]).
 
+:- use_module(library(clpfd)).
+:- use_module(gasket_math).
+
 % Interpoliert zwei oder eine Liste von Farben
 farbe_interpolieren(VonRot/VonGruen/VonBlau,NachRot/NachGruen/NachBlau,Prozentsatz,ErgebnisRot/ErgebnisGruen/ErgebnisBlau) :-
 	!
@@ -56,7 +59,7 @@ negativer_radius(kreis(_,Radius)-_) :- Radius < 0.
 
 % Konveriert die übergebene Liste von Kreisen in SVG Code und schreibt diesen an den angegebenen Dateipfad
 schreibe_svg(
-	AlleKreise
+	AlleKreiseUnsortiert
 	, Name
 	, MaximaleGeneration
 	, MaximalerRadius
@@ -67,35 +70,32 @@ schreibe_svg(
 	, Farbpalette
 ) :-
 	!
-	
+	, gasket_math:sortiere_anhand_radius(AlleKreiseUnsortiert,AlleKreise)
 	% Bounding Boxen von allen Kreisen erzeugen
 	, maplist(umfassendes_rechteck, AlleKreise, Boxen)
-	
+
 	% Bounding Box um den kompletten Gasket ermitteln
 	, foldl(umfassendes_rechteck, Boxen, [100000, -100000, 100000, -100000], [Links, Rechts, Oben, Unten])
-	
+
 	% Viewpoint der SVG Datei berechnen
 	, Width is Rechts - Links
 	, Height is Unten - Oben
-	
+
 	% Kreise in SVG Code konvertieren
 	, AlleKreise = [Kreis|Kreise]
-	, include(negativer_radius, Kreise, KreiseNegativerRadius)
-	, exclude(negativer_radius, Kreise, KreisePositiverRadius)
 	, kreis_zu_svg(_,_,zufall_palette,[Gasketfarbe], Kreis, KreisSVGCode)
-	, maplist(kreis_zu_svg(MaximaleGeneration,MaximalerRadius,Farbmodus,Farbpalette), KreiseNegativerRadius, KreiseNegativSVGCode)
-	, maplist(kreis_zu_svg(MaximaleGeneration,MaximalerRadius,Farbmodus,Farbpalette), KreisePositiverRadius, KreisePositivSVGCode)
-	
+	, maplist(kreis_zu_svg(MaximaleGeneration,MaximalerRadius,Farbmodus,Farbpalette), Kreise, KreiseSVGCode)
+
 	% SVG Datei schreiben
 	, open(Name, write, Out)
 	, write(Out,'<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="20cm" height="20cm" ')
 	, ( Hintergrundfarbe \= 255/255/255, Hintergrundfarbe = R/G/B, format(Out, 'style="background-color:#~|~`0t~16r~2+~|~`0t~16r~2+~|~`0t~16r~2+" ', [R,G,B]); true)
 	, format(Out, 'viewBox="~f ~f ~f ~f">\n', [Links, Oben, Width, Height])
-	
+
 	% Kreise schreiben
-	, maplist(write(Out), KreiseNegativSVGCode)
 	, (Kreis = kreis(_,_)-KreisGeneration, KreisGeneration in GenerationenFilter, write(Out, KreisSVGCode), !; true) % Gasket Kreis nur generieren, wenn die entsprechende Generation erlaubt ist
-	, maplist(write(Out), KreisePositivSVGCode)
+	, maplist(write(Out), KreiseSVGCode)
+	%, maplist(write(Out), KreisePositivSVGCode)
 	, write(Out, '</svg>')
 	, close(Out)
 .

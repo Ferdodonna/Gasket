@@ -1,14 +1,7 @@
-:- module(gasket_math, [radius/2, umschreibender_kreis/4, naechste_loesung/5, initiale_kreise/6, skaliere_kreis/7, rotiere_kreis/4, absoluter_radius/2, sortiere_anhand_radius/2]).
-
-:- use_module(library(clpfd)).
+:- module(gasket_math, [radius/2, umschreibender_kreis/4, naechste_loesung/5, initiale_kreise/6, skaliere_kreis/7, rotiere_kreis/4, spiegele_kreis/3]).
 
 % Gibt Radius von Kreis zurück
-radius(kreis(_,Radius)-_,Radius).
 radius(kreis(_,Radius), Radius).
-
-% Gibt den absoluten Radius eines generierten Kreises zurück
-absoluter_radius(kreis(_,Radius)-_, AbsoluterRadius) :- AbsoluterRadius is abs(Radius).
-absoluter_radius(kreis(_,Radius), AbsoluterRadius) :- AbsoluterRadius is abs(Radius).
 
 % Gibt Position von Kreis zurück
 position(kreis(Position,_),Position).
@@ -23,32 +16,6 @@ baryzentrisch2kartesisch(
 	, X is (A * X3 + B * X1 + C * X2) / U
 	, Y is (A * Y3 + B * Y1 + C * Y2) / U
 .
-
-% sortiere liste von kreisen nach radius
-sortiere_anhand_radius([H|Liste],Sortiert) :-
-	partition(groesser_radius(H),Liste,Groesser,Kleiner)
-	, sortiere_anhand_radius(Groesser,GroesserSortiert)
-	, sortiere_anhand_radius(Kleiner,KleinerSortiert)
-	, append(GroesserSortiert,[H|KleinerSortiert],Sortiert)
-.
-sortiere_anhand_radius([],[]).
-
-partition(_,[],[],[]).
-partition(Pred,[H|T],[H|Erfuellt],ErfuelltNicht) :-
-	call(Pred,H)
-	, partition(Pred,T,Erfuellt,ErfuelltNicht)
-.
-partition(Pred,[H|T],Erfuellt,[H|ErfuelltNicht]) :-
-	\+ call(Pred,H)
-	, partition(Pred,T,Erfuellt,ErfuelltNicht)
-.
-
-groesser_radius(Kreis1,Kreis2) :-
-	absoluter_radius(Kreis1,Radius1)
-	, absoluter_radius(Kreis2,Radius2)
-	, Radius2 >= Radius1
-.
-
 
 % Transformiert einen Kreis anhand eines Skalierung und eines Offsets (X/Y)
 skaliere_kreis(kreis(KreisX/KreisY,KreisRadius), OffsetXPre, OffsetYPre, Skalierung, OffsetX, OffsetY, kreis(KreisNeuX/KreisNeuY, KreisNeuRadius)) :-
@@ -112,6 +79,21 @@ naechste_loesung(
 	, maplist(position,[VorherigeLoesung,Kreis1,Kreis2,Kreis3],[Xe/Ye,X1/Y1,X2/Y2,X3/Y3])
 	, NaechsteLoesungX is (2 * (L1*X1 + L2*X2 + L3*X3) - LE*Xe) / LZ
 	, NaechsteLoesungY is (2 * (L1*Y1 + L2*Y2 + L3*Y3) - LE*Ye) / LZ
+.
+
+% Spiegelt einen Kreis an einem anderen Kreis
+spiegele_kreis(kreis(KreisX/KreisY, Radius), kreis(SpiegelX/SpiegelY, SpiegelRadius), kreis(ErgebnisX/ErgebnisY, ErgebnisRadius)) :-
+	DeltaX is KreisX - SpiegelX
+	, DeltaY is KreisY - SpiegelY
+	, Winkel is atan2(DeltaX, DeltaY)
+	, Distanz is sqrt(DeltaX*DeltaX+DeltaY*DeltaY)
+	, DistanzWeit is Distanz + abs(Radius)
+	, DistanzNah is Distanz - abs(Radius)
+	, SpiegelKonstante is SpiegelRadius * SpiegelRadius / 2
+	, ErgebnisRadius is abs( (SpiegelKonstante / DistanzNah) - (SpiegelKonstante / DistanzWeit) )
+	, DistanzNeu is (SpiegelKonstante / DistanzNah) + (SpiegelKonstante / DistanzWeit)
+	, ErgebnisX is cos(Winkel) * DistanzNeu + SpiegelX
+	, ErgebnisY is sin(Winkel) * DistanzNeu + SpiegelY
 .
 
 % Berechnet mit drei Radien die ersten drei Kreise

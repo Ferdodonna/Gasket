@@ -19,11 +19,14 @@ initiale_queue(
 	, rotiere_kreis(Kreis1Original, KreisUmschreibend, Rotation, Kreis1)
 	, rotiere_kreis(Kreis2Original, KreisUmschreibend, Rotation, Kreis2)
 	, rotiere_kreis(Kreis3Original, KreisUmschreibend, Rotation, Kreis3)
+	, naechste_loesung(Kreis2,Kreis3,KreisUmschreibend,Kreis1,Kreis1Loesung)
+	, naechste_loesung(Kreis1,Kreis3,KreisUmschreibend,Kreis2,Kreis2Loesung)
+	, naechste_loesung(Kreis1,Kreis2,KreisUmschreibend,Kreis3,Kreis3Loesung)
 	, GenerationPlusEins is Generation + 1
 	, QueueBisherEnde = [
-		Kreis1-Generation % Ergibt Kreis 1
-		, Kreis2-Generation % Ergibt Kreis 2
-		, Kreis3-Generation % Ergibt Kreis 3
+		(Kreis2/Kreis3/KreisUmschreibend/Kreis1Loesung)+Generation % Ergibt Kreis 1
+		, (Kreis1/Kreis3/KreisUmschreibend/Kreis2Loesung)+Generation % Ergibt Kreis 2
+		, (Kreis1/Kreis2/KreisUmschreibend/Kreis3Loesung)+Generation % Ergibt Kreis 3
 		, (Kreis1/Kreis2/Kreis3/KreisUmschreibend)-GenerationPlusEins % Ergibt inbeschriebenen Kreis
 		, (Kreis1/Kreis2/KreisUmschreibend/Kreis3)-GenerationPlusEins % Ergibt Kreis 1 Lösung
 		, (Kreis1/Kreis3/KreisUmschreibend/Kreis2)-GenerationPlusEins % Ergibt Kreis 2 Lösung
@@ -53,20 +56,19 @@ schleifen_iteration(
 ) :-
 	% Nächstes Queue Element berechnen
 	QueueBisher = [ QueueFront | QueueNeu ]
-
+	
 	% Kreis berechnen aus Quartupel
-	, (
-	QueueFront = (Kreis1/Kreis2/Kreis3/KreisLoesung)-Generation
+	, ( QueueFront = (Kreis1/Kreis2/Kreis3/KreisLoesung)-Generation ; QueueFront = (Kreis1/Kreis2/Kreis3/KreisLoesung)+Generation )
 	, naechste_loesung(Kreis1,Kreis2,Kreis3,KreisLoesung,KreisNeu)
-
+	
 	% Berechneter Radius noch zu groß, oder noch nicht genug Generationen generiert?
 	, (
-
+		
 		(
 			radius(KreisNeu, RadiusNeu)
 			, (AnzahlGenerationen =< 0; Generation =< AnzahlGenerationen; MinimalerRadius > 0, MinimalerRadius =< RadiusNeu)
 			, (MinimalerRadius =< 0; MinimalerRadius =< RadiusNeu; AnzahlGenerationen > 0, Generation =< AnzahlGenerationen)
-
+			
 			% Neue Queue Elemente hinzufügen
 			, KindGeneration is Generation + 1
 			, (
@@ -85,34 +87,19 @@ schleifen_iteration(
 					, QueueBisherEnde = QueueTempEnde
 				)
 			)
-
+				
 			% Neuen Kreis in die Liste schreiben
 			, KreiseBisherEnde = [ KreisNeu-Generation | KreiseNeuEnde ]
-
+			
 			% Nested Gasket aufrufen
-			, call(NestedGasketFunktion, QueueNeu-QueueTempEnde, KreisNeu-KindGeneration, Radius1/Radius2/Radius3-Rotation, QueueNeu-QueueNeuEnde)
+			, call(NestedGasketFunktion, QueueNeu-QueueTempEnde, Kreis1/Kreis2/Kreis3/KreisNeu-KindGeneration, Radius1/Radius2/Radius3-Rotation, QueueNeu-QueueNeuEnde)
 		)
-
+		
 		% Nein! => Queue-Quartupel überspringen
 		; (
 			KreiseNeuEnde = KreiseBisherEnde
 			, QueueNeuEnde = QueueBisherEnde
 		)
-	)
-	;
-	(
-	QueueFront = Kreis-Generation
-	, radius(Kreis, Radius)
-	, (AnzahlGenerationen =< 0; Generation =< AnzahlGenerationen; MinimalerRadius > 0, MinimalerRadius =< Radius)
-	, (MinimalerRadius =< 0; MinimalerRadius =< Radius; AnzahlGenerationen > 0, Generation =< AnzahlGenerationen)
-	, !
-	, KreiseBisherEnde = [QueueFront | KreiseNeuEnde]
-	, call(NestedGasketFunktion, QueueNeu-QueueBisherEnde, Kreis-Generation, Radius1/Radius2/Radius3-Rotation, QueueNeu-QueueNeuEnde)
-	; (
-		KreiseNeuEnde = KreiseBisherEnde
-		, QueueNeuEnde = QueueBisherEnde
-	)
-	)
 	)
 .
 
@@ -139,18 +126,18 @@ schleife(
 	, (MaximaleKreisAnzahl =< 0, !; KreisAnzahl < MaximaleKreisAnzahl)
 	, !
 	, KreisAnzahlNeu is KreisAnzahl + 1
-
+	
 	% Iteration durchführen
 	, schleifen_iteration(QueueBisher, KreiseBisher, QueueNeu, KreiseNeu, AnzahlGenerationen, MinimalerRadius, NestedGasketFunktion, Radius1/Radius2/Radius3-Rotation)
-
+	
 	% Nächste Iteration aufrufen
 	, schleife(QueueNeu, KreiseNeu, KreisAnzahlNeu, AnzahlGenerationen, MinimalerRadius, MaximaleKreisAnzahl, NestedGasketFunktion, Radius1/Radius2/Radius3-Rotation, KreiseResultat)
 .
 schleife(_,KreiseDifferenceList-_,_,_,_,_,_,_,Kreise) :- zu_liste(KreiseDifferenceList, Kreise).
 
 % Creates 3 circles in the supplied circle with equal relative radiuses as the surrounding gasket
-nested_gasket_scaled(Queue-QueueEnde, kreis(_, KreisRadius)-_, _, Queue-QueueEnde) :- KreisRadius < 0, !.
-nested_gasket_scaled(Queue-QueueBisherEnde, KreisNeu-GenerationNeu, Radius1/Radius2/Radius3-Rotation, Queue-QueueNeuEnde) :-
+nested_gasket_scaled(Queue-QueueEnde, _/_/_/kreis(_, KreisRadius)-_, _, Queue-QueueEnde) :- KreisRadius < 0, !.
+nested_gasket_scaled(Queue-QueueBisherEnde, _/_/_/KreisNeu-GenerationNeu, Radius1/Radius2/Radius3-Rotation, Queue-QueueNeuEnde) :-
 	KreisNeu = kreis(KreisNeuX/KreisNeuY, KreisNeuRadius)
 	, initiale_kreise(Radius1, Radius2, Radius3, Kreis1, Kreis2, Kreis3)
 	, umschreibender_kreis(Kreis1,Kreis2,Kreis3,kreis(KreisUmschreibendX/KreisUmschreibendY, KreisUmschreibendRadius))
@@ -161,21 +148,24 @@ nested_gasket_scaled(Queue-QueueBisherEnde, KreisNeu-GenerationNeu, Radius1/Radi
 	, initiale_queue(Queue-QueueBisherEnde,Kreis1Skaliert,Kreis2Skaliert,Kreis3Skaliert,kreis(KreisNeuX/KreisNeuY, -KreisNeuRadius)-GenerationNeu,Rotation,Queue-QueueNeuEnde)
 .
 
+nested_gasket_reflected(Queue-QueueEnde, _/_/_/kreis(_, KreisRadius)-_, _, Queue-QueueEnde) :- KreisRadius < 0, !.
+nested_gasket_reflected(Queue-QueueBisherEnde, Kreis1/Kreis2/Kreis3/KreisNeu-GenerationNeu, _, Queue-QueueNeuEnde) :-
+	spiegele_kreis(Kreis1, KreisNeu, Kreis1Gespiegelt)
+	, spiegele_kreis(Kreis2, KreisNeu, Kreis2Gespiegelt)
+	, spiegele_kreis(Kreis3, KreisNeu, Kreis3Gespiegelt)
+	, KreisNeu = kreis(KreisNeuX/KreisNeuY, KreisNeuRadius)
+	, initiale_queue(Queue-QueueBisherEnde,Kreis1Gespiegelt,Kreis2Gespiegelt,Kreis3Gespiegelt,kreis(KreisNeuX/KreisNeuY, -KreisNeuRadius)-GenerationNeu,0,Queue-QueueNeuEnde)
+.
+
+
 % Creates random 3 circles in the supplied circle
-nested_gasket_random(Queue-QueueBisherEnde, KreisNeu-GenerationNeu, _, Queue-QueueNeuEnde) :-
-	A is random_float^(1/6)
-	, B is 1/A
-	% Formula for boundaries of Radius3 found using "solve 1/a + 1/b + 1/x < 2 * sqrt(1/ab+1/ax+1/bx) for x" in wolfram alpha
-	, AB_cube is A*A*A*B*B*B
-	, A_minus_B_sqared is (A-B)*(A-B)
-	, RandomWidth is 2 * sqrt(AB_cube/A_minus_B_sqared/A_minus_B_sqared)
-	, RandomOffset is (A*A*B + A*B*B) / (A-B) / (A-B)
-	, Minimum is RandomOffset - RandomWidth
-	, Maximum is min(max(A, Minimum), RandomOffset + RandomWidth)
-	, X is Maximum - random_float^6 * (Maximum - Minimum)
-	, random_permutation([A,B,X], [Radius1, Radius2, Radius3])
+nested_gasket_random(Queue-QueueBisherEnde, Kreise-GenerationNeu, _, Queue-QueueNeuEnde) :-
+	A = 1
+	, B is random_float / 2 + 0.5
+	, C is 1/C
+	, random_permutation([A, B, C], [Radius1, Radius2, Radius3])
 	, Rotation is random_float * pi * 2
-	, nested_gasket_scaled(Queue-QueueBisherEnde, KreisNeu-GenerationNeu, Radius1/Radius2/Radius3-Rotation, Queue-QueueNeuEnde)
+	, nested_gasket_scaled(Queue-QueueBisherEnde, Kreise-GenerationNeu, Radius1/Radius2/Radius3-Rotation, Queue-QueueNeuEnde)
 .
 
 % Turns nesting off
@@ -196,12 +186,15 @@ generiere_gasket(
 ) :-
 	% Berechne Initiale Kreise
 	initiale_kreise(Radius1, Radius2, Radius3, Kreis1, Kreis2, Kreis3)
-
+	
 	% Berechne den Umschreibenden Kreis
 	, umschreibender_kreis(Kreis1,Kreis2,Kreis3,KreisUmschreibend)
-
+	
 	% Erzeuge die initiale Queue von Kreisen
-	, initiale_queue(Queue-Queue,Kreis1,Kreis2,Kreis3,KreisUmschreibend-0,Rotation,QueueInitial)
+	, KreisUmschreibend = kreis(KreisUmschreibendX/KreisUmschreibendY, KreisUmschreibendRadius)
+	, KreisUmschreibendInvert = kreis(KreisUmschreibendX/KreisUmschreibendY, -KreisUmschreibendRadius)
+	, nested_gasket_scaled(QueueLeer-QueueLeer, Kreis1/Kreis2/Kreis3/KreisUmschreibendInvert-0, Radius1/Radius2/Radius3-Rotation, QueueInitial)
+	
 	% Rufe Berechnungsschleife auf
 	, schleife(
 		QueueInitial
@@ -220,6 +213,10 @@ generiere_gasket(
 % Filtert die übergebene liste von Kreisen danach, ob ihre jeweilige Generation generiert werden soll
 filter_kreise_praedikat(GenerationenFilter, _-Generation) :- !, Generation in GenerationenFilter.
 filter_kreise(Kreise, GenerationenFilter, KreiseGefiltert) :- include(filter_kreise_praedikat(GenerationenFilter), Kreise, KreiseGefiltert).
+
+% Gibt den absoluten Radius eines generierten Kreises zurück
+absoluter_radius(kreis(_,Radius)-_, AbsoluterRadius) :- AbsoluterRadius is abs(Radius).
+
 
 % Maximum als funktion
 maximum(A, B, R) :- R is max(A, B).
@@ -248,18 +245,18 @@ gasket(
 	% Generiere alle Kreise
 	generiere_gasket(Radius1, Radius2, Radius3, Generationen, MinimalerKreisRadius, KreisAnzahl, Nesting, Radius1/Radius2/Radius3-Rotation, AlleKreise)
 	, AlleKreise = [Kreis|Kreise]
-
+	
 	% Filter die generierten Kreise ggf.
 	, filter_kreise(Kreise, GenerationenFilter, KreiseGefiltert)
-
+	
 	% Finde den größten Radius heraus
 	, maplist(absoluter_radius, Kreise, KreisRadii)
 	, foldl(maximum, KreisRadii, 0, MaximalerRadius)
-
+	
 	% Finde die größte Generation heraus
 	, maplist(generation, Kreise, KreisGenerationen)
 	, foldl(maximum, KreisGenerationen, 0, MaximaleGenerationen)
-
+	
 	% Schreibe SVG Datei
 	, !
 	, schreibe_svg([Kreis|KreiseGefiltert], Ausgabepfad, MaximaleGenerationen, MaximalerRadius, GenerationenFilter, Gasketfarbe, HintergrundFarbe, Farbmodus, Farbpalette)

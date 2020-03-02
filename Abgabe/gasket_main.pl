@@ -34,6 +34,7 @@ main(KommandoZeile) :-
 		, [opt(farbe_radius_interpolierend), longflags(['radius-coloring']), type(boolean), default('false'), help('Stellt den modus es Einfärbens auf ''radius-basierend''.')]
 		, [opt(nested_random), longflags(['random-nesting']), type(boolean), default('false'), help('Aktiviert zufallsbasiertes nesting von Gaskets.')]
 		, [opt(nested_scaled), longflags(['scaled-nesting']), type(boolean), default('false'), help('Aktiviert nesting von Gaskets mithilfe von skalierung.')]
+		, [opt(nested_relfected), longflags(['reflecting-nesting']), type(boolean), default('false'), help('Aktiviert nesting von Gaskets mithilfe von Reflektierung.')]
 		, [opt(rotation), longflags(['rotation']), type(term), default(0), help('Rotiert das gasket um einen bestimmten Winkel (in Rad).')]
 	]
 	
@@ -76,6 +77,7 @@ main(KommandoZeile) :-
 			, (member(farbe_generation_interpolierend(true), Optionen), Farbmodus = generation_interpolierend; true)
 			, (member(nested_scaled(true), Optionen), Nesting = nested_gasket_scaled; true)
 			, (member(nested_random(true), Optionen), Nesting = nested_gasket_random; true)
+			, (member(nested_relfected(true), Optionen), Nesting = nested_gasket_reflected; true)
 			, (Nesting = nested_gasket_off; true)
 			, (Farbmodus = generation; true)
 			

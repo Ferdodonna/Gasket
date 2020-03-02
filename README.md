@@ -12,7 +12,7 @@ See below examples for tutorial on how to create your own drawings! (Todo: Forma
 ![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/example8.PNG)
 ![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/example12.PNG)
 
-This project implements a script in Prolog that spits out [Apollian Gaskets](https://en.wikipedia.org/wiki/Apollonian_gasket). There are two ways to use it - either over command line or the SWI Prolog environment -  both require you to install [SWI Prolog](https://www.swi-prolog.org).
+This project implements a script in Prolog that spits out [Apollian Gaskets](https://en.wikipedia.org/wiki/Apollonian_gasket) as svg file. There are two ways to use it - either over command line or the SWI Prolog environment -  both require you to install [SWI Prolog](https://www.swi-prolog.org).
 
 # Using the provided SWI Prolog environment, 
 you simply consult the gasket.pl and then execute the gasket/14 predicate. The gasket predicate works as follows:

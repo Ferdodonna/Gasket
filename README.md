@@ -50,7 +50,7 @@ options:
           
           3. nested_gasket_random => nesting algorithm that randomly draws apollian gaskets into circles, affected by limiters
 
-**GenerationFilter**: Draws all generations in the given domain, to draw all generations input inf..sup
+**GenerationFilter**: Draws all generations in the given domain, to draw all generations input ```inf..sup```. If you only want the 2nd,3rd,4th and 8th generations input ```2..4\/8```. Simple clpfd domains. 
 
 **Gasketcolor**: color of the biggest circle, RGB value in the R/G/B format
 

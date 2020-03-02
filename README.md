@@ -19,36 +19,11 @@ you simply consult the gasket.pl and then execute the gasket/14 predicate. The g
 
 
 
-### gasket(    
-  ###      Radius1, Radius2, Radius3
-  ###      , Rotation
-   
-  ###      , Output path for svg file
-   
-  ###      , Amount of generations to draw at least
-   
-  ###      , Amount of circles to draw at least
-   
-  ###      , Smallest value a circle radius can have
-   
-  ###      , nesting algorithm
-   
-  ###      , generationfilter via clpfd domains
-   
-  ###      , color of biggest circle
-   
-  ###      , background color
-   
-  ###      , coloring algorithm
-   
-  ###      , colors for coloring algorithm
-
-### )
-
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/Tutorial%20Pictures/gasket.png)
       
 So given the input 
 
-![alt text](https://github.com/Ferdodonna/Gasket/blob/master/examples/input_example.PNG)
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/Tutorial%20Pictures/input_example.png)
 
 the script would draw the pattern from three starting circles all with a radius of 100, go at least to generation 5/circle amount 2200/radius size 0.1, use no nesting algorithm, draw all generations but generation 1, make the biggest circle black and the background white, use the radius interpolation algorithm for coloring given the RGB colors (123,293,23) and (18,255,91), and rotate all gaskets by 3.1415 rad = 180°.
 

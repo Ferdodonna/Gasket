@@ -19,7 +19,7 @@ you simply consult the gasket.pl and then execute the gasket/14 predicate. The g
 
 
 
-![alt text](https://github.com/Ferdodonna/Gasket/blob/master/Tutorial%20Pictures/gasket.png)
+![alt text](https://github.com/Ferdodonna/Gasket/blob/master/Tutorial%20Pictures/gasket.PNG)
       
 So given the input 
 

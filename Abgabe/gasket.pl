@@ -201,7 +201,6 @@ generiere_gasket(
 	, umschreibender_kreis(Kreis1,Kreis2,Kreis3,KreisUmschreibend)
 
 	% Erzeuge die initiale Queue von Kreisen
-	, KreisUmschreibend = kreis(KreisUmschreibendX/KreisUmschreibendY, KreisUmschreibendRadius)
 	, initiale_queue(Queue-Queue,Kreis1,Kreis2,Kreis3,KreisUmschreibend-0,Rotation,QueueInitial)
 	% Rufe Berechnungsschleife auf
 	, schleife(

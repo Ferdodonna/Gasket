@@ -29,19 +29,19 @@ the script would draw the pattern from three starting circles all with a radius 
 
 # Possible inputs for each argument
 
-Radius1-3: everything greater than 0
+**Radius1-3**: everything greater than 0
 
-Rotation: 0 - 2π
+**Rotation**: 0 - 2π
 
-OutputPath: name of your .svg file, for example 'julius.svg'
+**OutputPath**: name of your .svg file, for example 'julius.svg'
 
-Generations: maximum amount of generations drawn,a natural number, if this limiter should be ignored input -1, can be overridden by another limiter
+**Generations**: maximum amount of generations drawn,a natural number, if this limiter should be ignored input -1, can be overridden by another limiter
 
-MaximumCircleAmount: maximum amount of circles drawn, a natural number, if this limiter should be ignored input -1, can be overridden by another limiter 
+**MaximumCircleAmount**: maximum amount of circles drawn, a natural number, if this limiter should be ignored input -1, can be overridden by another limiter 
 
-MinimalCircleRadius: minimum drawn circle radius, a floating point number, if this limiter should be ignored input -1, can be overridden by another limiter
+**MinimalCircleRadius**: minimum drawn circle radius, a floating point number, if this limiter should be ignored input -1, can be overridden by another limiter
 
-NestingAlgorithm: A nesting algorithm describes a way to draw additional circles into already drawn circles. We currently have three 
+**NestingAlgorithm**: A nesting algorithm describes a way to draw additional circles into already drawn circles. We currently have three 
 options:
           
           1. nested_gasket_off => no nesting algorithm
@@ -50,13 +50,13 @@ options:
           
           3. nested_gasket_random => nesting algorithm that randomly draws apollian gaskets into circles, affected by limiters
 
-GenerationFilter: Draws all generations in the given domain, to draw all generations input inf..sup
+**GenerationFilter**: Draws all generations in the given domain, to draw all generations input inf..sup
 
-Gasketcolor: color of the biggest circle, RGB value in the R/G/B format
+**Gasketcolor**: color of the biggest circle, RGB value in the R/G/B format
 
-Backgroundcolor: RGB value in the R/G/B format
+**Backgroundcolor**: RGB value in the R/G/B format
 
-ColoringAlgorithm: Currently we have six coloring algorithms:
+**ColoringAlgorithm**: Currently we have six coloring algorithms:
 
 
         1. zufall => random coloring using all possible colors
@@ -71,7 +71,7 @@ ColoringAlgorithm: Currently we have six coloring algorithms:
           
         6. radius_interpolierend => we interpolate between the given colors based on radius
 
-*Colors*: a list of colors, each color in the R/G/B format
+**Colors**: a list of colors, each color in the R/G/B format
 
 
 

@@ -15,7 +15,7 @@ See below examples for tutorial on how to create your own drawings! (Todo: Forma
 This project implements a script in Prolog that spits out [Apollian Gaskets](https://en.wikipedia.org/wiki/Apollonian_gasket) as svg file. There are two ways to use it - either over command line or the SWI Prolog environment -  both require you to install [SWI Prolog](https://www.swi-prolog.org).
 
 # Using the provided SWI Prolog environment 
-Consult the gasket.pl and then, just to be save, execute ```use_module(library(clpfd)).```. Then execute the gasket/14 predicate as follows:
+Consult the gasket.pl and then, just to be safe, execute ```use_module(library(clpfd)).```. Then execute the gasket/14 predicate as follows:
 
 
 

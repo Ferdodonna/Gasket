@@ -73,6 +73,8 @@ schreibe_svg(
 	, gasket_math:sortiere_anhand_radius(AlleKreiseUnsortiert,AlleKreise)
 	% Bounding Boxen von allen Kreisen erzeugen
 	, maplist(umfassendes_rechteck, AlleKreise, Boxen)
+	, length(AlleKreise,L)
+	, write(L)
 
 	% Bounding Box um den kompletten Gasket ermitteln
 	, foldl(umfassendes_rechteck, Boxen, [100000, -100000, 100000, -100000], [Links, Rechts, Oben, Unten])

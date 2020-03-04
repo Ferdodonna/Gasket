@@ -56,19 +56,19 @@ schleifen_iteration(
 ) :-
 	% Nächstes Queue Element berechnen
 	QueueBisher = [ QueueFront | QueueNeu ]
-	
+
 	% Kreis berechnen aus Quartupel
 	, ( QueueFront = (Kreis1/Kreis2/Kreis3/KreisLoesung)-Generation ; QueueFront = (Kreis1/Kreis2/Kreis3/KreisLoesung)+Generation )
 	, naechste_loesung(Kreis1,Kreis2,Kreis3,KreisLoesung,KreisNeu)
-	
+
 	% Berechneter Radius noch zu groß, oder noch nicht genug Generationen generiert?
 	, (
-		
+
 		(
 			radius(KreisNeu, RadiusNeu)
 			, (AnzahlGenerationen =< 0; Generation =< AnzahlGenerationen; MinimalerRadius > 0, MinimalerRadius =< RadiusNeu)
 			, (MinimalerRadius =< 0; MinimalerRadius =< RadiusNeu; AnzahlGenerationen > 0, Generation =< AnzahlGenerationen)
-			
+
 			% Neue Queue Elemente hinzufügen
 			, KindGeneration is Generation + 1
 			, (
@@ -87,14 +87,14 @@ schleifen_iteration(
 					, QueueBisherEnde = QueueTempEnde
 				)
 			)
-				
+
 			% Neuen Kreis in die Liste schreiben
 			, KreiseBisherEnde = [ KreisNeu-Generation | KreiseNeuEnde ]
-			
+
 			% Nested Gasket aufrufen
 			, call(NestedGasketFunktion, QueueNeu-QueueTempEnde, Kreis1/Kreis2/Kreis3/KreisNeu-KindGeneration, Radius1/Radius2/Radius3-Rotation, QueueNeu-QueueNeuEnde)
 		)
-		
+
 		% Nein! => Queue-Quartupel überspringen
 		; (
 			KreiseNeuEnde = KreiseBisherEnde
@@ -126,10 +126,10 @@ schleife(
 	, (MaximaleKreisAnzahl =< 0, !; KreisAnzahl < MaximaleKreisAnzahl)
 	, !
 	, KreisAnzahlNeu is KreisAnzahl + 1
-	
+
 	% Iteration durchführen
 	, schleifen_iteration(QueueBisher, KreiseBisher, QueueNeu, KreiseNeu, AnzahlGenerationen, MinimalerRadius, NestedGasketFunktion, Radius1/Radius2/Radius3-Rotation)
-	
+
 	% Nächste Iteration aufrufen
 	, schleife(QueueNeu, KreiseNeu, KreisAnzahlNeu, AnzahlGenerationen, MinimalerRadius, MaximaleKreisAnzahl, NestedGasketFunktion, Radius1/Radius2/Radius3-Rotation, KreiseResultat)
 .
@@ -186,15 +186,13 @@ generiere_gasket(
 ) :-
 	% Berechne Initiale Kreise
 	initiale_kreise(Radius1, Radius2, Radius3, Kreis1, Kreis2, Kreis3)
-	
+
 	% Berechne den Umschreibenden Kreis
 	, umschreibender_kreis(Kreis1,Kreis2,Kreis3,KreisUmschreibend)
-	
+
 	% Erzeuge die initiale Queue von Kreisen
-	, KreisUmschreibend = kreis(KreisUmschreibendX/KreisUmschreibendY, KreisUmschreibendRadius)
-	, KreisUmschreibendInvert = kreis(KreisUmschreibendX/KreisUmschreibendY, -KreisUmschreibendRadius)
-	, nested_gasket_scaled(QueueLeer-QueueLeer, Kreis1/Kreis2/Kreis3/KreisUmschreibendInvert-0, Radius1/Radius2/Radius3-Rotation, QueueInitial)
-	
+	, initiale_queue(Queue-Queue,Kreis1,Kreis2,Kreis3,KreisUmschreibend-0,Rotation,QueueInitial)
+
 	% Rufe Berechnungsschleife auf
 	, schleife(
 		QueueInitial
@@ -245,18 +243,18 @@ gasket(
 	% Generiere alle Kreise
 	generiere_gasket(Radius1, Radius2, Radius3, Generationen, MinimalerKreisRadius, KreisAnzahl, Nesting, Radius1/Radius2/Radius3-Rotation, AlleKreise)
 	, AlleKreise = [Kreis|Kreise]
-	
+
 	% Filter die generierten Kreise ggf.
 	, filter_kreise(Kreise, GenerationenFilter, KreiseGefiltert)
-	
+
 	% Finde den größten Radius heraus
 	, maplist(absoluter_radius, Kreise, KreisRadii)
 	, foldl(maximum, KreisRadii, 0, MaximalerRadius)
-	
+
 	% Finde die größte Generation heraus
 	, maplist(generation, Kreise, KreisGenerationen)
 	, foldl(maximum, KreisGenerationen, 0, MaximaleGenerationen)
-	
+
 	% Schreibe SVG Datei
 	, !
 	, schreibe_svg([Kreis|KreiseGefiltert], Ausgabepfad, MaximaleGenerationen, MaximalerRadius, GenerationenFilter, Gasketfarbe, HintergrundFarbe, Farbmodus, Farbpalette)

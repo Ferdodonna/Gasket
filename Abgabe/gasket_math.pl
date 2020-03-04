@@ -3,6 +3,10 @@
 % Gibt Radius von Kreis zurück
 radius(kreis(_,Radius), Radius).
 
+% Gibt den absoluten Radius eines generierten Kreises zurück
+absoluter_radius(kreis(_,Radius)-_, AbsoluterRadius) :- AbsoluterRadius is abs(Radius).
+absoluter_radius(kreis(_,Radius),AbsoluterRadius) :- AbsoluterRadius is abs(Radius).
+
 % Gibt Position von Kreis zurück
 position(kreis(Position,_),Position).
 
@@ -15,6 +19,31 @@ baryzentrisch2kartesisch(
 	U is A + B + C
 	, X is (A * X3 + B * X1 + C * X2) / U
 	, Y is (A * Y3 + B * Y1 + C * Y2) / U
+.
+
+% sortiere liste von kreisen nach radius
+sortiere_anhand_radius([H|Liste],Sortiert) :-
+	partition(groesser_radius(H),Liste,Groesser,Kleiner)
+	, sortiere_anhand_radius(Groesser,GroesserSortiert)
+	, sortiere_anhand_radius(Kleiner,KleinerSortiert)
+	, append(GroesserSortiert,[H|KleinerSortiert],Sortiert)
+.
+sortiere_anhand_radius([],[]).
+
+partition(_,[],[],[]).
+partition(Pred,[H|T],[H|Erfuellt],ErfuelltNicht) :-
+	call(Pred,H)
+	, partition(Pred,T,Erfuellt,ErfuelltNicht)
+.
+partition(Pred,[H|T],Erfuellt,[H|ErfuelltNicht]) :-
+	\+ call(Pred,H)
+	, partition(Pred,T,Erfuellt,ErfuelltNicht)
+.
+
+groesser_radius(Kreis1,Kreis2) :-
+	absoluter_radius(Kreis1,Radius1)
+	, absoluter_radius(Kreis2,Radius2)
+	, Radius2 >= Radius1
 .
 
 % Transformiert einen Kreis anhand eines Skalierung und eines Offsets (X/Y)

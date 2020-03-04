@@ -42,7 +42,7 @@ the script would draw the pattern from three starting circles all with a radius 
 
 **MinimalCircleRadius**: minimum drawn circle radius, a floating point number, if this limiter should be ignored input -1, can be overridden by another limiter
 
-**NestingAlgorithm**: A nesting algorithm describes a way to draw additional circles into already drawn circles. We currently have three 
+**NestingAlgorithm**: A nesting algorithm describes a way to draw additional circles into already drawn circles. We currently have four 
 options:
           
           1. nested_gasket_off => no nesting algorithm
@@ -50,6 +50,7 @@ options:
           2. nested_gasket_scaled => nesting algorithm that tries to copy the original gasket pattern into every circle, affected by limiters
           
           3. nested_gasket_random => nesting algorithm that randomly draws apollian gaskets into circles, affected by limiters
+          4. nested_gasket_reflected => nesting algorithm that uses circles as mirror axes and then mirrors all the outside points on those axes
 
 **GenerationFilter**: Draws all generations in the given domain, to draw all generations input ```inf..sup```. If you only want the 2nd,3rd,4th and 8th generations input ```2..4\/8```. Simple clpfd domains. 
 

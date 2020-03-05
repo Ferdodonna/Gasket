@@ -45,61 +45,53 @@ ist_leer(S-S) :- var(S).
 % 2. Packt generierten Kreis in die Liste von generierten Kreisen (ans Ende)
 % 3. Legt 3 neue Kreis-Quartupel in die Queue
 schleifen_iteration(
-	QueueBisher-QueueBisherEnde
+	[ QueueFront | QueueNeu ]-QueueBisherEnde
 	, Kreise-KreiseBisherEnde
 	, QueueNeu-QueueNeuEnde
 	, Kreise-KreiseNeuEnde
 	, AnzahlGenerationen
 	, MinimalerRadius
 	, NestedGasketFunktion
-	, Radius1/Radius2/Radius3-Rotation
+	, GasketKreise
 ) :-
-	% Nächstes Queue Element berechnen
-	QueueBisher = [ QueueFront | QueueNeu ]
-
+	!
+	
 	% Kreis berechnen aus Quartupel
 	, ( QueueFront = (Kreis1/Kreis2/Kreis3/KreisLoesung)-Generation ; QueueFront = (Kreis1/Kreis2/Kreis3/KreisLoesung)+Generation )
 	, naechste_loesung(Kreis1,Kreis2,Kreis3,KreisLoesung,KreisNeu)
 
 	% Berechneter Radius noch zu groß, oder noch nicht genug Generationen generiert?
+	, radius(KreisNeu, RadiusNeu)
+	, (AnzahlGenerationen =< 0; Generation =< AnzahlGenerationen; MinimalerRadius > 0, MinimalerRadius =< RadiusNeu)
+	, (MinimalerRadius =< 0; MinimalerRadius =< RadiusNeu; AnzahlGenerationen > 0, Generation =< AnzahlGenerationen)
+
+	% Neue Queue Elemente hinzufügen
+	, KindGeneration is Generation + 1
 	, (
-
+		% Rekursive Berechnung erwünscht, oder nicht?
 		(
-			radius(KreisNeu, RadiusNeu)
-			, (AnzahlGenerationen =< 0; Generation =< AnzahlGenerationen; MinimalerRadius > 0, MinimalerRadius =< RadiusNeu)
-			, (MinimalerRadius =< 0; MinimalerRadius =< RadiusNeu; AnzahlGenerationen > 0, Generation =< AnzahlGenerationen)
-
-			% Neue Queue Elemente hinzufügen
-			, KindGeneration is Generation + 1
-			, (
-				% Rekursive Berechnung erwünscht, oder nicht?
-				(
-					QueueFront = _-_
-					, QueueBisherEnde = [
-						(KreisNeu/Kreis1/Kreis3/Kreis2)-KindGeneration
-						, (KreisNeu/Kreis2/Kreis3/Kreis1)-KindGeneration
-						, (KreisNeu/Kreis1/Kreis2/Kreis3)-KindGeneration
-						| QueueTempEnde
-					]
-				)
-				; (
-					QueueFront = _+_
-					, QueueBisherEnde = QueueTempEnde
-				)
-			)
-
-			% Neuen Kreis in die Liste schreiben
-			, KreiseBisherEnde = [ KreisNeu-Generation | KreiseNeuEnde ]
-
-			% Nested Gasket aufrufen
-			, call(NestedGasketFunktion, QueueNeu-QueueTempEnde, Kreis1/Kreis2/Kreis3/KreisNeu-KindGeneration, Radius1/Radius2/Radius3-Rotation, QueueNeu-QueueNeuEnde)
+			QueueFront = _-_
+			, QueueBisherEnde = [
+				(KreisNeu/Kreis1/Kreis3/Kreis2)-KindGeneration
+				, (KreisNeu/Kreis2/Kreis3/Kreis1)-KindGeneration
+				, (KreisNeu/Kreis1/Kreis2/Kreis3)-KindGeneration
+				| QueueTempEnde
+			]
 		)
-
-		% Nein! => Queue-Quartupel überspringen
 		; (
-			KreiseNeuEnde = KreiseBisherEnde
-			, QueueNeuEnde = QueueBisherEnde
+			QueueFront = _+_
+			, QueueBisherEnde = QueueTempEnde
 		)
+	)
+
+	% Neuen Kreis in die Liste schreiben
+	, KreiseBisherEnde = [ KreisNeu-Generation | KreiseNeuEnde ]
+
+	% Nested Gasket aufrufen, wenn radius größer zwei mal minimaler radius
+	, (
+		(MinimalerRadius =< 0; RadiusNeu > MinimalerRadius * 2)
+		, call(NestedGasketFunktion, QueueNeu-QueueTempEnde, Kreis1/Kreis2/Kreis3/KreisNeu-KindGeneration, GasketKreise, QueueNeu-QueueNeuEnde)
+		; QueueTempEnde = QueueNeuEnde
 	)
 .
 
@@ -110,37 +102,40 @@ zu_liste(_,[]).
 
 
 % Wiederholt iterationen solange, bis Queue leer ist
+schleife(Queue-Queue,KreiseDifferenceList-_,_,_,_,_,_,_,Kreise) :- var(Queue), zu_liste(KreiseDifferenceList, Kreise).
 schleife(
-	QueueBisher
+	QueueBisher-QueueBisherEnde
 	, KreiseBisher
 	, KreisAnzahl
 	, AnzahlGenerationen
 	, MinimalerRadius
 	, MaximaleKreisAnzahl
 	, NestedGasketFunktion
-	, Radius1/Radius2/Radius3-Rotation
+	, Kreis1/Kreis2/Kreis3/KreisUmschreibend-Rotation
 	, KreiseResultat
 ) :-
-	% Queue überprüfen, dass sie nicht leer ist und wir neuen Kreis generieren dürfen
-	\+ ist_leer(QueueBisher)
-	, (MaximaleKreisAnzahl =< 0, !; KreisAnzahl < MaximaleKreisAnzahl)
-	, !
-	, KreisAnzahlNeu is KreisAnzahl + 1
-
-	% Iteration durchführen
-	, schleifen_iteration(QueueBisher, KreiseBisher, QueueNeu, KreiseNeu, AnzahlGenerationen, MinimalerRadius, NestedGasketFunktion, Radius1/Radius2/Radius3-Rotation)
-
+	% Generieren des neuen Kreises ist erlaubt und funktioniert?
+	(MaximaleKreisAnzahl =< 0; KreisAnzahl < MaximaleKreisAnzahl)
+	
+	, (
+		schleifen_iteration(QueueBisher-QueueBisherEnde, KreiseBisher, QueueNeu-QueueNeuEnde, KreiseNeu, AnzahlGenerationen, MinimalerRadius, NestedGasketFunktion, Kreis1/Kreis2/Kreis3/KreisUmschreibend-Rotation)
+		, KreisAnzahlNeu is KreisAnzahl + 1
+		
+		% Queue-element überspringen
+		; KreisAnzahlNeu = KreisAnzahl
+		, QueueBisher-QueueBisherEnde = [_| QueueNeu]-QueueNeuEnde
+		, KreiseBisher = KreiseNeu
+	)
+	
 	% Nächste Iteration aufrufen
-	, schleife(QueueNeu, KreiseNeu, KreisAnzahlNeu, AnzahlGenerationen, MinimalerRadius, MaximaleKreisAnzahl, NestedGasketFunktion, Radius1/Radius2/Radius3-Rotation, KreiseResultat)
+	, schleife(QueueNeu-QueueNeuEnde, KreiseNeu, KreisAnzahlNeu, AnzahlGenerationen, MinimalerRadius, MaximaleKreisAnzahl, NestedGasketFunktion, Kreis1/Kreis2/Kreis3/KreisUmschreibend-Rotation, KreiseResultat)
 .
-schleife(_,KreiseDifferenceList-_,_,_,_,_,_,_,Kreise) :- zu_liste(KreiseDifferenceList, Kreise).
 
 % Creates 3 circles in the supplied circle with equal relative radiuses as the surrounding gasket
 nested_gasket_scaled(Queue-QueueEnde, _/_/_/kreis(_, KreisRadius)-_, _, Queue-QueueEnde) :- KreisRadius < 0, !.
-nested_gasket_scaled(Queue-QueueBisherEnde, _/_/_/KreisNeu-GenerationNeu, Radius1/Radius2/Radius3-Rotation, Queue-QueueNeuEnde) :-
+nested_gasket_scaled(Queue-QueueBisherEnde, _/_/_/KreisNeu-GenerationNeu, Kreis1/Kreis2/Kreis3/KreisUmschreibend-Rotation, Queue-QueueNeuEnde) :-
 	KreisNeu = kreis(KreisNeuX/KreisNeuY, KreisNeuRadius)
-	, initiale_kreise(Radius1, Radius2, Radius3, Kreis1, Kreis2, Kreis3)
-	, umschreibender_kreis(Kreis1,Kreis2,Kreis3,kreis(KreisUmschreibendX/KreisUmschreibendY, KreisUmschreibendRadius))
+	, KreisUmschreibend = kreis(KreisUmschreibendX/KreisUmschreibendY, KreisUmschreibendRadius)
 	, Skalierung is -KreisNeuRadius/KreisUmschreibendRadius % -1, weil Umschreibendender Kreis negativen radius besitzt
 	, skaliere_kreis(Kreis1, KreisUmschreibendX, KreisUmschreibendY, Skalierung, KreisNeuX, KreisNeuY, Kreis1Skaliert)
 	, skaliere_kreis(Kreis2, KreisUmschreibendX, KreisUmschreibendY, Skalierung, KreisNeuX, KreisNeuY, Kreis2Skaliert)
@@ -159,13 +154,16 @@ nested_gasket_reflected(Queue-QueueBisherEnde, Kreis1/Kreis2/Kreis3/KreisNeu-Gen
 
 
 % Creates random 3 circles in the supplied circle
+nested_gasket_random(Queue-QueueEnde, _/_/_/kreis(_, KreisRadius)-_, _, Queue-QueueEnde) :- KreisRadius < 0, !.
 nested_gasket_random(Queue-QueueBisherEnde, Kreise-GenerationNeu, _, Queue-QueueNeuEnde) :-
 	A = 1
 	, B is random_float / 2 + 0.5
 	, C is 1/C
 	, random_permutation([A, B, C], [Radius1, Radius2, Radius3])
 	, Rotation is random_float * pi * 2
-	, nested_gasket_scaled(Queue-QueueBisherEnde, Kreise-GenerationNeu, Radius1/Radius2/Radius3-Rotation, Queue-QueueNeuEnde)
+	, initiale_kreise(Radius1, Radius2, Radius3, Kreis1, Kreis2, Kreis3)
+	, umschreibender_kreis(Kreis1,Kreis2,Kreis3,KreisUmschreibend)
+	, nested_gasket_scaled(Queue-QueueBisherEnde, Kreise-GenerationNeu, Kreis1/Kreis2/Kreis3/KreisUmschreibend-Rotation, Queue-QueueNeuEnde)
 .
 
 % Turns nesting off
@@ -202,7 +200,7 @@ generiere_gasket(
 		, MinimalerRadius
 		, MaximaleKreisAnzahl
 		, NestedGasketFunktion
-		, Radius1/Radius2/Radius3-Rotation
+		, Kreis1/Kreis2/Kreis3/KreisUmschreibend-Rotation
 		, Kreise
 	)
 .
@@ -256,6 +254,5 @@ gasket(
 	, foldl(maximum, KreisGenerationen, 0, MaximaleGenerationen)
 
 	% Schreibe SVG Datei
-	, !
 	, schreibe_svg([Kreis|KreiseGefiltert], Ausgabepfad, MaximaleGenerationen, MaximalerRadius, GenerationenFilter, Gasketfarbe, HintergrundFarbe, Farbmodus, Farbpalette)
 .

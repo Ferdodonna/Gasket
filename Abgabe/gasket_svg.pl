@@ -49,17 +49,21 @@ berechne_farbe(MaximalerRadius	,Radius	,_					,_			,radius_interpolierend			,Far
 
 % Konvertiert den übergebenen Kreis in SVG Code
 kreis_zu_svg(MaximaleGeneration,MaximalerRadius,Farbmodus,Farbpalette,kreis(X/Y,Radius)-Generation,Svg) :-
-	berechne_farbe(MaximalerRadius,Radius,MaximaleGeneration,Generation,Farbmodus,Farbpalette,Cr/Cg/Cb)
+	!
+	, berechne_farbe(MaximalerRadius,Radius,MaximaleGeneration,Generation,Farbmodus,Farbpalette,Cr/Cg/Cb)
 	, RadiusBetrag is abs(Radius)
 	, format(atom(Svg),'<circle cx="~5f" cy="~5f" r="~5f" stroke="none" stroke_width="1" fill="#~|~`0t~16r~2+~|~`0t~16r~2+~|~`0t~16r~2+" />\n', [X,Y,RadiusBetrag,Cr,Cg,Cb])
 .
 
-% Sortiert Liste
-komparator(Delta, kreis(_, Radius1)-_, kreis(_, Radius2)-_) :-
-	AbsRadius1 is abs(Radius1)
-	, AbsRadius2 is abs(Radius2)
-	, ( AbsRadius1 >= AbsRadius2, Delta = <; Delta = >)
+negativer_radius(kreis(_,Radius)-_) :- Radius < 0.
+
+fast_svg(Circles,Name) :-
+	maplist(add_gen,Circles,CirclesG)
+	, schreibe_svg(CirclesG,Name,5,600,inf..sup,0/0/0,255/255/255,zufall,[])
 .
+
+add_gen(Circle-G,Circle-G).
+add_gen(Circle,Circle-1).
 
 % Konveriert die übergebene Liste von Kreisen in SVG Code und schreibt diesen an den angegebenen Dateipfad
 schreibe_svg(
@@ -73,14 +77,12 @@ schreibe_svg(
 	, Farbmodus
 	, Farbpalette
 ) :-
-	predsort(komparator, AlleKreiseUnsortiert, AlleKreise) % Sortiere Liste von kreisen von größtem Radius bis zum kleinsten
-	
+	!
+	, gasket_math:sortiere_anhand_radius(AlleKreiseUnsortiert,AlleKreise)
 	% Bounding Boxen von allen Kreisen erzeugen
 	, maplist(umfassendes_rechteck, AlleKreise, Boxen)
-	, length(AlleKreise, AnzahlKreise)
-	, write('Generated ')
-	, write(AnzahlKreise)
-	, write(' circles.')
+	, length(AlleKreise,L)
+	, write(L)
 
 	% Bounding Box um den kompletten Gasket ermitteln
 	, foldl(umfassendes_rechteck, Boxen, [100000, -100000, 100000, -100000], [Links, Rechts, Oben, Unten])

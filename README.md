@@ -1,5 +1,5 @@
 
-This project is all about calculating ![Apollonian Gaskets][https://de.wikipedia.org/wiki/Apollonios-Kreisf%C3%BCllung]:
+This project is all about calculating [Apollonian Gaskets](https://de.wikipedia.org/wiki/Apollonios-Kreisf%C3%BCllung):
 
 See below examples for tutorial on how to create your own drawings! (Todo: Formatting + Command line tutorial)
 
